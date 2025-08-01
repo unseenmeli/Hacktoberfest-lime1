@@ -15,6 +15,9 @@
       ]
     ],
     "name": "OneShotApp",
-    "slug": "OneShotApp"
+    "slug": "OneShotApp",
+    "ios": {
+      "bundleIdentifier": "com.anonymous.OneShotApp"
+    }
   }
 }
