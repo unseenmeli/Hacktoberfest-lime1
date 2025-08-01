@@ -11,10 +11,10 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const panther = require("../media/panther.jpg");
+const panther = require("../../media/panther.jpg");
 // const [theme, setTheme] = useState("light");
 
-function loading() {
+function Loading() {
   const [page, setPage] = useState("load");
 
   const textSlide = useRef(new Animated.Value(-500)).current;
@@ -53,4 +53,4 @@ function loading() {
     );
   }
 }
-export default loading;
+export default Loading;
