@@ -14,9 +14,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const panther = require("../../media/panther.jpg");
 // const [theme, setTheme] = useState("light");
 
-function Loading() {
-  const [page, setPage] = useState("load");
-
+function Loading({ onLoadingComplete }) {
   const textSlide = useRef(new Animated.Value(-500)).current;
   useEffect(() => {
     Animated.timing(textSlide, {
@@ -28,29 +26,28 @@ function Loading() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setPage("login");
+      onLoadingComplete();
     }, 3000);
   });
 
-  if (page === "load") {
-    return (
-      <View className="flex-1">
-        <Image
-          className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
-          source={panther}
-        />
-        <View className="flex-1 justify-center items-center">
-          <Animated.Text
-            className="bg-white py-1 px-3 shadow-lg font-serif text-3xl font-bold rounded-md"
-            style={{
-              transform: [{ translateX: textSlide }], // This connects the animation
-            }}
-          >
-            Welcome to OneShot!
-          </Animated.Text>
-        </View>
+  return (
+    <View className="flex-1">
+      <Image
+        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
+        source={panther}
+      />
+      <View className="flex-1 justify-center items-center">
+        <Animated.Text
+          className="bg-white py-1 px-3 shadow-lg font-serif text-3xl font-bold rounded-md"
+          style={{
+            transform: [{ translateX: textSlide }], // This connects the animation
+          }}
+        >
+          Welcome to OneShot!
+        </Animated.Text>
       </View>
-    );
-  }
+    </View>
+  );
 }
+
 export default Loading;
