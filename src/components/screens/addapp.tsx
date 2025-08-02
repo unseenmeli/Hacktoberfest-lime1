@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function AddApp({ page, setPage, panther }) {
+function AddApp({ page, setPage, panther, apps, setApps }) {
+  const [newApp, setNewApp] = useState({ title: "", desc: "" });
   return (
     <View className="flex-1">
       <Image
@@ -71,6 +72,10 @@ function AddApp({ page, setPage, panther }) {
             <TextInput
               className="p-3 font-serif italic font-bold"
               placeholder="App name here"
+              onChangeText={(newText) => {
+                setNewApp({ ...newApp, title: newText });
+              }}
+              value={newApp.title}
             ></TextInput>
           </View>
           <View>
@@ -85,8 +90,22 @@ function AddApp({ page, setPage, panther }) {
               multiline={true}
               numberOfLines={6}
               placeholder="App description here"
+              onChangeText={(newText) => {
+                setNewApp({ ...newApp, desc: newText });
+              }}
             ></TextInput>
           </View>
+          <TouchableOpacity
+            onPress={() => {
+              const newList = [...apps, newApp];
+              setApps(newList);
+              setPage("home");
+            }}
+          >
+            <View className="bg-white mx-24 my-4 w-48 h-24 rounded-xl shadow-lg justify-center items-center">
+              <Text className="font-bold font-serif text-xl">Submit</Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
       <View className="bg-white opacity-80 shadow-lg w-full h-24 items-center">

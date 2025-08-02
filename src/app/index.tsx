@@ -19,14 +19,30 @@ import AddApp from "../components/screens/addapp";
 export default function App() {
   const panther = require("../media/panther.jpg");
   const [page, setPage] = useState("load");
-
+  const [apps, setApps] = useState([]);
   if (page === "AddApp") {
-    return <AddApp page={page} setPage={setPage} panther={panther} />;
+    return (
+      <AddApp
+        page={page}
+        setPage={setPage}
+        panther={panther}
+        apps={apps}
+        setApps={setApps}
+      />
+    );
   }
 
   if (page === "load") {
     return <Loading onLoadingComplete={() => setPage("home")} />;
   }
 
-  return <Home panther={panther} page={page} setPage={setPage} />;
+  return (
+    <Home
+      panther={panther}
+      page={page}
+      setPage={setPage}
+      apps={apps}
+      setApps={setApps}
+    />
+  );
 }

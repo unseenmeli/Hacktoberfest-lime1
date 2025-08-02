@@ -12,15 +12,14 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-function AddApp({ page, setPage, panther }) {
-  return (
-    <View className="flex-1 justify-center items-center">
-      <Text>hello this is AddApp</Text>
-    </View>
-  );
+function checkif(alist: []) {
+  if (alist.length > 0) {
+    return false;
+  }
 }
 
-function Home({ page, setPage, panther }) {
+function Home({ page, setPage, panther, apps, setApps }) {
+  console.log("Apps", apps);
   return (
     <View className="flex-1">
       <Image
@@ -48,15 +47,33 @@ function Home({ page, setPage, panther }) {
       </View>
       <View className="flex-1">
         <View className="flex-row mx-1 p-2 gap-4 flex-wrap">
+          {apps.map((element) => {
+            return (
+              <TouchableOpacity
+                key={element.title}
+                onPress={() => setPage("AddApp")}
+              >
+                <View className="shadow-lg w-24 h-24 bg-white/90 justify-center items-center rounded-xl"></View>
+                <View className="items-center my-1 bg-white/80 shadow-lg rounded-xl">
+                  <Text className="font-serif font-bold text-base">
+                    {element.title}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
           <TouchableOpacity onPress={() => setPage("AddApp")}>
-            <View className="shadow-lg w-24 h-24 bg-white/80 justify-center items-center rounded-xl">
+            <View className="shadow-lg w-24 h-24 bg-white/90 justify-center items-center rounded-xl">
               <View className="absolute bg-black w-1.5 h-20 rounded-xl"></View>
               <View className="absolute bg-black w-20 h-1.5 rounded-xl"></View>
+            </View>
+            <View className="items-center my-1 bg-white/80 shadow-lg rounded-xl">
+              <Text className="font-serif font-bold text-base">Add App</Text>
             </View>
           </TouchableOpacity>
         </View>
       </View>
-      <View className="bg-white opacity-80 shadow-lg w-full h-24 items-center">
+      <View className="bg-white opacity-90 shadow-lg w-full h-24 items-center">
         <TouchableOpacity>
           <Text className="p-2 font-serif font-bold text-xl">Apps</Text>
         </TouchableOpacity>
