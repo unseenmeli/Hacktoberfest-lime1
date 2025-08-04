@@ -12,6 +12,8 @@ import {
   TextInput,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import db from "../../app/db";
+import { id } from "@instantdb/react-native";
 
 function AddApp({ page, setPage, panther, apps, setApps }) {
   const [newApp, setNewApp] = useState({ title: "", desc: "" });
@@ -97,8 +99,12 @@ function AddApp({ page, setPage, panther, apps, setApps }) {
           </View>
           <TouchableOpacity
             onPress={() => {
-              const newList = [...apps, newApp];
-              setApps(newList);
+              db.transact(
+                db.tx.appslist[id()].create({
+                  appname: newApp.title,
+                  appdesc: newApp.desc,
+                })
+              );
               setPage("home");
             }}
           >

@@ -11,15 +11,18 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-function checkif(alist: []) {
-  if (alist.length > 0) {
-    return false;
-  }
-}
+import db from "../../app/db";
+import { id } from "@instantdb/react-native";
 
 function Home({ page, setPage, panther, apps, setApps }) {
   console.log("Apps", apps);
+  const { isLoading, error, data } = db.useQuery({ appslist: {} });
+  if (isLoading) {
+    return null;
+  }
+  if (error) {
+    return null;
+  }
   return (
     <View className="flex-1">
       <Image
@@ -47,16 +50,20 @@ function Home({ page, setPage, panther, apps, setApps }) {
       </View>
       <View className="flex-1">
         <View className="flex-row mx-1 p-2 gap-4 flex-wrap">
-          {apps.map((element) => {
+          {data.appslist.reverse().map((element) => {
             return (
               <TouchableOpacity
-                key={element.title}
-                onPress={() => setPage("AddApp")}
+                key={element.id}
+                onPress={() => {
+                  setPage(
+                    `App_${element.id}_${element.appname}_${element.appdesc}` // so basically giving a name thats connected with _ and in index.tsx we split it when _ appears into parts -- if multiple 1,2,3,4,... so on.
+                  );
+                }}
               >
                 <View className="shadow-lg w-24 h-24 bg-white/90 justify-center items-center rounded-xl"></View>
                 <View className="items-center my-1 bg-white/80 shadow-lg rounded-xl">
                   <Text className="font-serif font-bold text-base">
-                    {element.title}
+                    {element.appname}
                   </Text>
                 </View>
               </TouchableOpacity>
