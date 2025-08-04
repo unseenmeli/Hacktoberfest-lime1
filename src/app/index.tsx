@@ -16,13 +16,22 @@ import Loading from "../components/screens/loading";
 import Home from "../components/screens/home";
 import AddApp from "../components/screens/addapp";
 import AppDetail from "../components/screens/addedappid";
+import SettingsP from "@/components/screens/settings";
 import { init, i, InstaQLEntity, id } from "@instantdb/react-native";
 import db from "./db";
 
 export default function App() {
-  const panther = require("../media/panther.jpg");
   const [page, setPage] = useState("load");
   const [apps, setApps] = useState([]);
+  const [isActive, setIsActive] = useState(false);
+  const lightpanther = require("../media/panther.jpg");
+  const darkpanther = require("../media/panther1.png");
+
+  const panther = isActive ? darkpanther : lightpanther;
+
+  if (page === "load") {
+    return <Loading onLoadingComplete={() => setPage("home")} />;
+  }
 
   if (page.startsWith("App_")) {
     const parts = page.split("_");
@@ -31,7 +40,15 @@ export default function App() {
       appName: parts[2],
       appDesc: parts[3],
     };
-    return <AppDetail appData={appData} setPage={setPage} panther={panther} />;
+    return (
+      <AppDetail
+        appData={appData}
+        setPage={setPage}
+        panther={panther}
+        isActive={isActive}
+        setIsActive={setIsActive}
+      />
+    );
   }
 
   if (page === "AddApp") {
@@ -42,22 +59,33 @@ export default function App() {
         panther={panther}
         apps={apps}
         setApps={setApps}
+        isActive={isActive}
+        setIsActive={setIsActive}
       />
     );
   }
 
-  if (page === "load") {
-    return <Loading onLoadingComplete={() => setPage("home")} />;
-  }
-
-  if (page === "home")
+  if (page === "settings")
     return (
-      <Home
+      <SettingsP
         panther={panther}
         page={page}
         setPage={setPage}
         apps={apps}
         setApps={setApps}
+        isActive={isActive}
+        setIsActive={setIsActive}
       />
     );
+  return (
+    <Home
+      panther={panther}
+      page={page}
+      setPage={setPage}
+      apps={apps}
+      setApps={setApps}
+      isActive={isActive}
+      setIsActive={setIsActive}
+    />
+  );
 }
