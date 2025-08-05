@@ -10,6 +10,7 @@
     "deploy": "npx expo export -p web && npx eas-cli@latest deploy"
   },
   "dependencies": {
+    "@babel/standalone": "^7.28.2",
     "@instantdb/react-native": "^0.20.16",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/netinfo": "^11.4.1",
@@ -25,6 +26,7 @@
     "react-native": "0.79.1",
     "react-native-get-random-values": "^1.11.0",
     "react-native-reanimated": "~3.17.4",
+    "react-native-render-html": "^6.3.4",
     "react-native-safe-area-context": "5.3.0",
     "react-native-screens": "~4.10.0",
     "react-native-web": "^0.20.0",

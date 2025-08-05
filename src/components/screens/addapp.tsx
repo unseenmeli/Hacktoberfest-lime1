@@ -15,6 +15,46 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
 import { id } from "@instantdb/react-native";
 
+function savedapp(aname, adesc) {
+  return `
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import React, { useState } from 'react';
+
+export default function App() {
+  const [count, setCount] = useState(0);
+  
+  const handlePress = () => {
+    setCount(count + 1);
+    Alert.alert('Pressed!', \`You've pressed the button \${count + 1} times\`);
+  };
+  
+  return (
+    <View style={{ padding: 10 }}>
+      <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>
+        ${aname}
+      </Text>
+      <Text style={{ fontSize: 16, marginBottom: 20 }}>
+        ${adesc}
+      </Text>
+      <TouchableOpacity 
+        onPress={handlePress}
+        style={{ 
+          backgroundColor: '#007AFF', 
+          padding: 10, 
+          borderRadius: 5,
+          alignItems: 'center'
+        }}
+      >
+        <Text style={{ color: 'white', fontWeight: 'bold' }}>
+          Press me! (Count: {count})
+        </Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+  `;
+}
+
 function AddApp({
   page,
   setPage,
@@ -178,6 +218,7 @@ function AddApp({
                 db.tx.appslist[id()].create({
                   appname: newApp.title,
                   appdesc: newApp.desc,
+                  code: savedapp(newApp.title, newApp.desc),
                 })
               );
               setPage("home");

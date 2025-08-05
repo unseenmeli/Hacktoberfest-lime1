@@ -39,6 +39,7 @@ export default function App() {
       appId: parts[1],
       appName: parts[2],
       appDesc: parts[3],
+      code: decodeURIComponent(parts[4]),
     };
     return (
       <AppDetail

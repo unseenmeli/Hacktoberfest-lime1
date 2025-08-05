@@ -9,10 +9,34 @@ import {
   Animated,
   useAnimatedValue,
   TouchableOpacity,
+  ScrollView,
+  useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
 import { id } from "@instantdb/react-native";
+import RenderHtml from "react-native-render-html";
+
+// const htmlContent = `
+//     <h1>Welcome to My App</h1>
+//     <p>This is a <strong>paragraph</strong> with some <em>styled text</em>.</p>
+//     <ul>
+//       <h2>we imported html into jsx</h2>
+//       <h2>arent we cool chat</h2>
+//     </ul>
+//     <div>
+//       <p>This is a styled div</p>
+//     </div>
+//   `;
+
+// const tagsStyles = {
+//   h1: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
+//   p: { fontSize: 16, marginBottom: 10 },
+//   strong: { fontWeight: "bold" },
+//   em: { fontStyle: "italic" },
+//   ul: { marginLeft: 20 },
+//   li: { marginBottom: 5 },
+// };
 
 function Home({
   page,
@@ -23,7 +47,10 @@ function Home({
   isActive,
   setIsActive,
 }) {
+  const { width } = useWindowDimensions();
+
   const { isLoading, error, data } = db.useQuery({ appslist: {} });
+
   if (isLoading) {
     return null;
   }
@@ -90,13 +117,15 @@ function Home({
       </View>
       <View className="flex-1">
         <View className="flex-row mx-1 p-2 gap-3.5 flex-wrap">
-          {data.appslist.reverse().map((element) => {
+          {data.appslist.toReversed().map((element) => {
             return (
               <TouchableOpacity
                 key={element.id}
                 onPress={() => {
                   setPage(
-                    `App_${element.id}_${element.appname}_${element.appdesc}` // so basically giving a name thats connected with _ and in index.tsx we split it when _ appears into parts -- if multiple 1,2,3,4,... so on.
+                    `App_${element.id}_${element.appname}_${
+                      element.appdesc
+                    }_${encodeURIComponent(element.code)}` // so basically giving a name thats connected with _ and in index.tsx we split it when _ appears into parts -- if multiple 1,2,3,4,... so on.
                   );
                 }}
               >
@@ -177,3 +206,8 @@ function Home({
 }
 
 export default Home;
+/* <RenderHtml
+              contentWidth={width}
+              // source={{ html: htmlContent }}
+              // tagsStyles={tagsStyles}
+            /> */

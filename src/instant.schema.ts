@@ -5,6 +5,7 @@ const schema = i.schema({
     appslist: i.entity({
       appname: i.string(),
       appdesc: i.string(),
+      code: i.string(),
     }),
   },
 });
