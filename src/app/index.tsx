@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Loading from "../components/screens/loading";
+import Login from "../components/screens/login";
 import Home from "../components/screens/home";
 import AddApp from "../components/screens/addapp";
 import AppDetail from "../components/screens/addedappid";
@@ -28,9 +29,31 @@ export default function App() {
   const darkpanther = require("../media/panther1.png");
 
   const panther = isActive ? darkpanther : lightpanther;
+  const { user, isLoading: authLoading } = db.useAuth();
+
+  React.useEffect(() => {
+    if (!authLoading && page === "load") {
+      if (!user) {
+        setPage("login");
+      } else {
+        setPage("home");
+      }
+    }
+  }, [user, authLoading, page]);
 
   if (page === "load") {
-    return <Loading onLoadingComplete={() => setPage("home")} />;
+    return <Loading onLoadingComplete={() => setPage(user ? "home" : "login")} />;
+  }
+
+  if (page === "login") {
+    return (
+      <Login
+        setPage={setPage}
+        panther={panther}
+        isActive={isActive}
+        setIsActive={setIsActive}
+      />
+    );
   }
 
   if (page.startsWith("App_")) {

@@ -24,6 +24,7 @@ function SettingsP({
   isActive,
   setIsActive,
 }) {
+  const { user } = db.useAuth();
   return (
     <View className="flex-1">
       <Image
@@ -68,7 +69,17 @@ function SettingsP({
                 OneShot
               </Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await db.auth.signOut();
+                  setPage("login");
+                } catch (error) {
+                  console.error("Sign out error:", error);
+                  setPage("login");
+                }
+              }}
+            >
               <View className="px-4">
                 <Text
                   className={`font-serif font-bold text-xl ${
@@ -89,6 +100,24 @@ function SettingsP({
           }`}
         >
           <View className="flex-1 justify-center items-center">
+            {user && (
+              <View className="mb-8">
+                <Text
+                  className={`font-bold font-serif text-xl text-center mb-2 ${
+                    isActive ? "color-white" : null
+                  }`}
+                >
+                  Logged in as:
+                </Text>
+                <Text
+                  className={`font-serif font-bold text-base text-center ${
+                    isActive ? "color-white/80" : "color-gray-600"
+                  }`}
+                >
+                  {user.email}
+                </Text>
+              </View>
+            )}
             <View className="flex-row items-center">
               <Text
                 className={`font-bold font-serif text-xl ${

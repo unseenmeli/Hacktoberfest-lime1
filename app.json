@@ -18,6 +18,9 @@
     "slug": "OneShotApp",
     "ios": {
       "bundleIdentifier": "com.anonymous.OneShotApp"
+    },
+    "android": {
+      "package": "com.anonymous.OneShotApp"
     }
   }
 }

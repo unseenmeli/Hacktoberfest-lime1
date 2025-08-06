@@ -10,50 +10,13 @@ import {
   useAnimatedValue,
   TouchableOpacity,
   TextInput,
+  Alert,
+  ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
 import { id } from "@instantdb/react-native";
-
-function savedapp(aname, adesc) {
-  return `
-import { View, Text, TouchableOpacity, Alert } from 'react-native';
-import React, { useState } from 'react';
-
-export default function App() {
-  const [count, setCount] = useState(0);
-  
-  const handlePress = () => {
-    setCount(count + 1);
-    Alert.alert('Pressed!', \`You've pressed the button \${count + 1} times\`);
-  };
-  
-  return (
-    <View style={{ padding: 10 }}>
-      <Text style={{ fontWeight: 'bold', fontSize: 20, marginBottom: 10 }}>
-        ${aname}
-      </Text>
-      <Text style={{ fontSize: 16, marginBottom: 20 }}>
-        ${adesc}
-      </Text>
-      <TouchableOpacity 
-        onPress={handlePress}
-        style={{ 
-          backgroundColor: '#007AFF', 
-          padding: 10, 
-          borderRadius: 5,
-          alignItems: 'center'
-        }}
-      >
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>
-          Press me! (Count: {count})
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-  `;
-}
 
 function AddApp({
   page,
@@ -65,6 +28,89 @@ function AddApp({
   setIsActive,
 }) {
   const [newApp, setNewApp] = useState({ title: "", desc: "" });
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const SERVER_URL = Platform.select({
+    ios: "http://localhost:3000",
+    android: "http://10.0.2.2:3000",
+    default: "http://localhost:3000",
+  });
+
+  const testServerConnection = async () => {
+    try {
+      const response = await fetch(`${SERVER_URL}/reload-instructions`);
+      const data = await response.json();
+      Alert.alert(
+        "Success",
+        `Server is running! ${data.message || "Connected"}`
+      );
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        `Cannot reach server at ${SERVER_URL}. Error: ${error.message}`
+      );
+    }
+  };
+
+  const generateAndSaveApp = async () => {
+    if (!newApp.desc.trim() || !newApp.title.trim()) {
+      Alert.alert("Error", "Please enter both app name and description");
+      return;
+    }
+
+    setIsGenerating(true);
+
+    try {
+      const response = await fetch(`${SERVER_URL}/create_app`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          description: newApp.desc,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const newline = data.code
+          .slice(13)
+          .slice(0, data.code.slice(13).length - 3);
+
+        try {
+          await db.transact(
+            db.tx.appslist[id()].create({
+              appname: newApp.title,
+              appdesc: newApp.desc,
+              code: newline,
+              logo: "",
+            })
+          );
+          Alert.alert("Success", "App created successfully!");
+          setPage("home");
+        } catch (dbError) {
+          console.error("Database error:", dbError);
+          Alert.alert(
+            "Database Error",
+            `Failed to save app: ${dbError.message}`
+          );
+        }
+      } else {
+        Alert.alert("Error", data.error || "Failed to generate code");
+      }
+    } catch (error) {
+      console.error("Network error:", error);
+      console.error("Server URL:", SERVER_URL);
+      Alert.alert(
+        "Connection Error",
+        `Could not connect to server at ${SERVER_URL}. Make sure your server is running. Error: ${error.message}`
+      );
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <View className="flex-1">
       <Image
@@ -109,7 +155,17 @@ function AddApp({
                 OneShot
               </Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await db.auth.signOut();
+                  setPage("login");
+                } catch (error) {
+                  console.error("Sign out error:", error);
+                  setPage("login");
+                }
+              }}
+            >
               <View className="px-4">
                 <Text
                   className={`font-serif font-bold text-xl ${
@@ -213,29 +269,45 @@ function AddApp({
             ></TextInput>
           </View>
           <TouchableOpacity
-            onPress={() => {
-              db.transact(
-                db.tx.appslist[id()].create({
-                  appname: newApp.title,
-                  appdesc: newApp.desc,
-                  code: savedapp(newApp.title, newApp.desc),
-                })
-              );
-              setPage("home");
+            onPress={testServerConnection}
+            style={{
+              width: 176,
+              height: 64,
+              marginTop: 10,
+              marginBottom: -10,
+              alignSelf: "center",
+              alignItems: "center",
             }}
+          >
+            <View className="bg-white w-44 h-16 rounded-xl shadow-lg justify-center items-center">
+              <Text className="text-center font-serif font-bold">
+                Test Connection
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={generateAndSaveApp}
+            disabled={isGenerating}
           >
             <View
               className={`bg-white mx-24 my-4 w-48 h-20 rounded-xl shadow-lg justify-center items-center ${
                 isActive ? "bg-black/70" : null
-              }`}
+              } ${isGenerating ? "opacity-50" : ""}`}
             >
-              <Text
-                className={`font-bold font-serif text-xl ${
-                  isActive ? "color-white" : null
-                }`}
-              >
-                Submit
-              </Text>
+              {isGenerating ? (
+                <ActivityIndicator
+                  size="small"
+                  color={isActive ? "#ffffff" : "#000000"}
+                />
+              ) : (
+                <Text
+                  className={`font-bold font-serif text-xl ${
+                    isActive ? "color-white" : null
+                  }`}
+                >
+                  Submit
+                </Text>
+              )}
             </View>
           </TouchableOpacity>
         </View>

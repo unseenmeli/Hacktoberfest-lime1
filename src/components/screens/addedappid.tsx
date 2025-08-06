@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, Image, TouchableOpacity, ScrollView, Alert } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import db from "../../app/db";
-import * as Babel from "@babel/standalone";
+import { executeAppCode } from "../../utils/codeExecutor";
 
-function AppDetail({ appData, setPage, panther, isActive }) {
+function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
   const { appId } = appData;
   const [codeResult, setCodeResult] = useState(null);
   const [codeError, setCodeError] = useState(null);
@@ -25,45 +31,7 @@ function AppDetail({ appData, setPage, panther, isActive }) {
   const displayCode = app?.code;
 
   useEffect(() => {
-    if (displayCode) {
-      try {
-        const cleanCode = displayCode.trim();
-        
-        const transformed = Babel.transform(cleanCode, {
-          presets: ['react', 'typescript'],
-          filename: 'component.tsx',
-          plugins: [['transform-modules-commonjs', { strict: false }]]
-        }).code;
-        
-        const moduleCode = `
-          const exports = {};
-          const module = { exports };
-          const require = (name) => {
-            if (name === 'react') return React;
-            if (name === 'react-native') return { View, Text, TouchableOpacity, Alert, ScrollView };
-            throw new Error('Module not found: ' + name);
-          };
-          
-          ${transformed}
-          
-          return module.exports.default || module.exports;
-        `;
-        
-        const getComponent = new Function(
-          'React', 'View', 'Text', 'TouchableOpacity', 'Alert', 'ScrollView', 
-          moduleCode
-        );
-        
-        const Component = getComponent(React, View, Text, TouchableOpacity, Alert, ScrollView);
-        const element = React.createElement(Component);
-        
-        setCodeResult(element);
-        setCodeError(null);
-      } catch (err) {
-        setCodeError(err.message);
-        setCodeResult(null);
-      }
-    }
+    executeAppCode(displayCode, setCodeResult, setCodeError);
   }, [displayCode]);
 
   if (isLoading) {
@@ -152,86 +120,31 @@ function AppDetail({ appData, setPage, panther, isActive }) {
           </View>
         </View>
       </View>
-      <View className="flex-1 items-center">
-        <View className="mx-1 p-2 flex-col gap">
-          <View className={` rounded-xl ${isActive ? "bg-black/20" : null}`}>
+      <View className="flex-1 items-center justify-center p-8">
+        <View
+          className={`bg-white/95 shadow-lg w-full h-full rounded-xl p-4 ${
+            isActive ? "bg-black/95" : null
+          }`}
+        >
+          {codeError ? (
             <Text
-              className={`p-3 font-serif font-bold text-xl ${
-                isActive ? "color-white" : null
+              className={`font-serif text-base ${
+                isActive ? "color-red-400" : "color-red-600"
               }`}
             >
-              App Name
+              Error: {codeError}
             </Text>
-          </View>
-          <View
-            className={`bg-white shadow-lg w-96 h-32 rounded-xl p-4 ${
-              isActive ? "bg-black/95" : null
-            }`}
-          >
-            <Text
-              className={`font-serif font-bold text-base ${
-                isActive ? "color-white" : null
-              }`}
-            >
-              {displayAppName}
-            </Text>
-          </View>
-          <View className={` rounded-xl ${isActive ? "bg-black/20" : null}`}>
-            <Text
-              className={`p-3 font-serif font-bold text-xl ${
-                isActive ? "color-white" : null
-              }`}
-            >
-              App Description
-            </Text>
-          </View>
-          <View
-            className={`bg-white shadow-lg w-96 h-32 rounded-xl p-4 ${
-              isActive ? "bg-black/95" : null
-            }`}
-          >
+          ) : codeResult ? (
+            <ScrollView>{codeResult}</ScrollView>
+          ) : (
             <Text
               className={`font-serif font-bold text-base ${
                 isActive ? "color-white" : null
               }`}
             >
-              {displayAppDesc}
+              Evaluating...
             </Text>
-          </View>
-          <View className={` rounded-xl ${isActive ? "bg-black/20" : null}`}>
-            <Text
-              className={`p-3 font-serif font-bold text-xl ${
-                isActive ? "color-white" : null
-              }`}
-            >
-              Code
-            </Text>
-          </View>
-          <View
-            className={`bg-white shadow-lg w-96 h-32 rounded-xl p-4 ${
-              isActive ? "bg-black/95" : null
-            }`}
-          >
-            {codeError ? (
-              <Text
-                className={`font-serif text-base ${
-                  isActive ? "color-red-400" : "color-red-600"
-                }`}
-              >
-                Error: {codeError}
-              </Text>
-            ) : codeResult ? (
-              <ScrollView>{codeResult}</ScrollView>
-            ) : (
-              <Text
-                className={`font-serif font-bold text-base ${
-                  isActive ? "color-white" : null
-                }`}
-              >
-                Evaluating...
-              </Text>
-            )}
-          </View>
+          )}
         </View>
       </View>
       <View

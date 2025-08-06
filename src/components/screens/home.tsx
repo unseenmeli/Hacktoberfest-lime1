@@ -15,28 +15,6 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
 import { id } from "@instantdb/react-native";
-import RenderHtml from "react-native-render-html";
-
-// const htmlContent = `
-//     <h1>Welcome to My App</h1>
-//     <p>This is a <strong>paragraph</strong> with some <em>styled text</em>.</p>
-//     <ul>
-//       <h2>we imported html into jsx</h2>
-//       <h2>arent we cool chat</h2>
-//     </ul>
-//     <div>
-//       <p>This is a styled div</p>
-//     </div>
-//   `;
-
-// const tagsStyles = {
-//   h1: { fontSize: 24, fontWeight: "bold", marginBottom: 10 },
-//   p: { fontSize: 16, marginBottom: 10 },
-//   strong: { fontWeight: "bold" },
-//   em: { fontStyle: "italic" },
-//   ul: { marginLeft: 20 },
-//   li: { marginBottom: 5 },
-// };
 
 function Home({
   page,
@@ -101,7 +79,17 @@ function Home({
                 OneShot
               </Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await db.auth.signOut();
+                  setPage("login");
+                } catch (error) {
+                  console.error("Sign out error:", error);
+                  setPage("login");
+                }
+              }}
+            >
               <View className="px-4">
                 <Text
                   className={`font-serif font-bold text-xl ${
@@ -116,7 +104,7 @@ function Home({
         </View>
       </View>
       <View className="flex-1">
-        <View className="flex-row mx-1 p-2 gap-3.5 flex-wrap">
+        <View className="flex-row mx-2 py-2 gap-2.5 flex-wrap justify-center">
           {data.appslist.toReversed().map((element) => {
             return (
               <TouchableOpacity
@@ -129,59 +117,123 @@ function Home({
                   );
                 }}
               >
-                <View
-                  className={`shadow-lg w-24 h-24 bg-white/95 justify-center items-center rounded-xl ${
-                    isActive ? "bg-black/85" : null
-                  }`}
-                ></View>
-                <View
-                  className={`items-center my-1 bg-white/90 shadow-lg rounded-xl ${
-                    isActive ? "bg-black/85" : null
-                  } `}
-                >
-                  <Text
-                    className={`font-serif font-bold text-base ${
-                      isActive ? "color-white" : null
-                    } `}
+                <View className="items-center">
+                  <View
+                    style={{
+                      width: 88,
+                      height: 88,
+                      backgroundColor: isActive
+                        ? "rgba(0, 0, 0, 0.85)"
+                        : "rgba(255, 255, 255, 0.95)",
+                      borderRadius: 12,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 3.84,
+                      elevation: 5,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      overflow: "hidden",
+                    }}
                   >
-                    {element.appname}
-                  </Text>
+                    {/* Logo placeholder */}
+                  </View>
+                  <View
+                    style={{
+                      marginTop: 4,
+                      backgroundColor: isActive
+                        ? "rgba(0, 0, 0, 0.85)"
+                        : "rgba(255, 255, 255, 0.9)",
+                      borderRadius: 12,
+                      paddingHorizontal: 4,
+                      paddingVertical: 2,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.22,
+                      shadowRadius: 2.22,
+                      elevation: 3,
+                    }}
+                  >
+                    <Text
+                      className={`font-serif font-bold text-sm ${
+                        isActive ? "color-white" : null
+                      } `}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={{ width: 84, textAlign: "center" }}
+                    >
+                      {element.appname}
+                    </Text>
+                  </View>
                 </View>
               </TouchableOpacity>
             );
           })}
-          <TouchableOpacity
-            className="px-0.5"
-            onPress={() => setPage("AddApp")}
-          >
-            <View
-              className={`shadow-lg w-24 h-24 bg-white/90 justify-center items-center rounded-xl ${
-                isActive ? "bg-black/90" : null
-              }`}
-            >
+          <TouchableOpacity onPress={() => setPage("AddApp")}>
+            <View className="items-center">
               <View
-                className={`absolute bg-black w-1.5 h-20 rounded-xl ${
-                  isActive ? "bg-white" : null
-                } `}
-              ></View>
-              <View
-                className={`absolute bg-black w-1.5 h-20 rounded-xl rotate-90 ${
-                  isActive ? "bg-white" : null
-                } `}
-              ></View>
-            </View>
-            <View
-              className={`items-center my-1 bg-white/80 shadow-lg rounded-xl ${
-                isActive ? "bg-black/80" : null
-              } `}
-            >
-              <Text
-                className={`font-serif font-bold text-base ${
-                  isActive ? "color-white" : null
-                } `}
+                style={{
+                  width: 88,
+                  height: 88,
+                  backgroundColor: isActive
+                    ? "rgba(0, 0, 0, 0.9)"
+                    : "rgba(255, 255, 255, 0.9)",
+                  borderRadius: 12,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 3.84,
+                  elevation: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
               >
-                Add App
-              </Text>
+                <View
+                  style={{
+                    position: "absolute",
+                    width: 6,
+                    height: 72,
+                    backgroundColor: isActive ? "#ffffff" : "#000000",
+                    borderRadius: 12,
+                  }}
+                />
+                <View
+                  style={{
+                    position: "absolute",
+                    width: 72,
+                    height: 6,
+                    backgroundColor: isActive ? "#ffffff" : "#000000",
+                    borderRadius: 12,
+                  }}
+                />
+              </View>
+              <View
+                style={{
+                  marginTop: 4,
+                  backgroundColor: isActive
+                    ? "rgba(0, 0, 0, 0.8)"
+                    : "rgba(255, 255, 255, 0.8)",
+                  borderRadius: 12,
+                  paddingHorizontal: 4,
+                  paddingVertical: 2,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.22,
+                  shadowRadius: 2.22,
+                  elevation: 3,
+                }}
+              >
+                <Text
+                  className={`font-serif font-bold text-sm ${
+                    isActive ? "color-white" : null
+                  } `}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
+                  style={{ width: 84, textAlign: "center" }}
+                >
+                  Add App
+                </Text>
+              </View>
             </View>
           </TouchableOpacity>
         </View>
@@ -206,8 +258,3 @@ function Home({
 }
 
 export default Home;
-/* <RenderHtml
-              contentWidth={width}
-              // source={{ html: htmlContent }}
-              // tagsStyles={tagsStyles}
-            /> */
