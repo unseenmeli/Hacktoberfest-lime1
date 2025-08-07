@@ -25,6 +25,7 @@ export default function App() {
   const [page, setPage] = useState("load");
   const [apps, setApps] = useState([]);
   const [isActive, setIsActive] = useState(false);
+  const [hasShownLoading, setHasShownLoading] = useState(false);
   const lightpanther = require("../media/panther.jpg");
   const darkpanther = require("../media/panther1.png");
 
@@ -32,17 +33,24 @@ export default function App() {
   const { user, isLoading: authLoading } = db.useAuth();
 
   React.useEffect(() => {
-    if (!authLoading && page === "load") {
+    if (!authLoading && page === "load" && hasShownLoading) {
       if (!user) {
         setPage("login");
       } else {
         setPage("home");
       }
     }
-  }, [user, authLoading, page]);
+  }, [user, authLoading, page, hasShownLoading]);
 
   if (page === "load") {
-    return <Loading onLoadingComplete={() => setPage(user ? "home" : "login")} />;
+    return <Loading 
+      onLoadingComplete={() => {
+        setHasShownLoading(true);
+        setPage(user ? "home" : "login");
+      }}
+      isActive={isActive}
+      panther={panther}
+    />;
   }
 
   if (page === "login") {

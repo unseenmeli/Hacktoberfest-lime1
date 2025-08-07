@@ -68,9 +68,9 @@ function Login({ setPage, panther, isActive, setIsActive }) {
   }
 
   return (
-    <View className="flex-1">
+    <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
       <Image
-        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10"
+        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
         source={panther}
       />
       <View className="flex-1 justify-center items-center px-8">

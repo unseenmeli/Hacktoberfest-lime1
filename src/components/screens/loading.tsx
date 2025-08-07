@@ -11,10 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const panther = require("../../media/panther.jpg");
-// const [theme, setTheme] = useState("light");
-
-function Loading({ onLoadingComplete }) {
+function Loading({ onLoadingComplete, isActive, panther }) {
   const textSlide = useRef(new Animated.Value(-500)).current;
   useEffect(() => {
     Animated.timing(textSlide, {
@@ -31,16 +28,18 @@ function Loading({ onLoadingComplete }) {
   });
 
   return (
-    <View className="flex-1">
+    <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
       <Image
-        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10"
+        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
         source={panther}
       />
       <View className="flex-1 justify-center items-center">
         <Animated.Text
-          className="bg-white py-1 px-3 shadow-lg font-serif text-3xl font-bold rounded-md"
+          className={`py-1 px-3 shadow-lg font-serif text-3xl font-bold rounded-md ${
+            isActive ? "bg-black color-white shadow-white" : "bg-white"
+          }`}
           style={{
-            transform: [{ translateX: textSlide }], // This connects the animation
+            transform: [{ translateX: textSlide }],
           }}
         >
           Welcome to OneShot!

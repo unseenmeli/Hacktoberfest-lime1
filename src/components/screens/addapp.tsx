@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
 import { id } from "@instantdb/react-native";
+import * as ImagePicker from "expo-image-picker";
 
 function AddApp({
   page,
@@ -27,8 +28,9 @@ function AddApp({
   isActive,
   setIsActive,
 }) {
-  const [newApp, setNewApp] = useState({ title: "", desc: "" });
+  const [newApp, setNewApp] = useState({ title: "", desc: "", logo: "" });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const { user } = db.useAuth();
 
   const SERVER_URL = Platform.select({
@@ -36,6 +38,31 @@ function AddApp({
     android: "http://10.0.2.2:3000",
     default: "http://localhost:3000",
   });
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission needed",
+        "Please grant permission to access your photos"
+      );
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+      base64: true,
+    });
+
+    if (!result.canceled) {
+      setSelectedImage(result.assets[0].uri);
+      setNewApp({ ...newApp, logo: result.assets[0].base64 });
+    }
+  };
 
   const testServerConnection = async () => {
     if (!user) {
@@ -48,7 +75,7 @@ function AddApp({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.email}`,
+          Authorization: `Bearer ${user.refresh_token}`,
         },
         body: JSON.stringify({ email: user.email }),
       });
@@ -76,6 +103,15 @@ function AddApp({
       return;
     }
 
+    if (!user.refresh_token) {
+      Alert.alert(
+        "Error",
+        "Authentication token not available. Please sign out and sign in again."
+      );
+      console.error("User object missing refresh_token:", user);
+      return;
+    }
+
     if (!newApp.desc.trim() || !newApp.title.trim()) {
       Alert.alert("Error", "Please enter both app name and description");
       return;
@@ -83,12 +119,14 @@ function AddApp({
 
     setIsGenerating(true);
 
+    console.log("Sending refresh_token:", user.refresh_token);
+
     try {
       const response = await fetch(`${SERVER_URL}/create_app`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${user.email}`,
+          Authorization: `Bearer ${user.refresh_token}`,
         },
         body: JSON.stringify({
           description: newApp.desc,
@@ -105,7 +143,7 @@ function AddApp({
               appname: newApp.title,
               appdesc: newApp.desc,
               code: data.code,
-              logo: "",
+              logo: newApp.logo || "",
             })
           );
           Alert.alert("Success", "App created successfully!");
@@ -133,14 +171,14 @@ function AddApp({
   };
 
   return (
-    <View className="flex-1">
+    <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
       <Image
-        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10"
+        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
         source={panther}
       />
       <View
-        className={`bg-white/80 shadow-lg w-full h-32 flex justify-end ${
-          isActive ? "bg-black/95" : null
+        className={`shadow-lg w-full h-32 flex justify-end ${
+          isActive ? "bg-black/95 !important" : "bg-white/95"
         }`}
       >
         <View className="w-full h-16 justify-center">
@@ -224,28 +262,35 @@ function AddApp({
             <View className="absolute">
               <View
                 className={`-my-20 mx-28 absolute bg-white shadow-2xl h-40 w-40 rounded-full ${
-                  isActive ? "bg-stone-800" : null
+                  isActive ? "bg-white" : null
                 }`}
               ></View>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={pickImage}>
               <View
-                className={`-my-20 mx-28 absolute bg-white shadow-2xl h-40 w-40 rounded-full ${
-                  isActive ? "bg-black/95" : null
-                }`}
+                className={`-my-20 mx-28 absolute shadow-2xl h-40 w-40 rounded-full ${
+                  isActive ? "bg-black" : "bg-white"
+                } justify-center items-center`}
               >
-                <View className="flex-1 justify-center items-center">
-                  <View
-                    className={`absolute bg-black w-1.5 h-20 rounded-xl ${
-                      isActive ? "bg-white" : null
-                    }`}
-                  ></View>
-                  <View
-                    className={`absolute bg-black w-20 h-1.5 rounded-xl ${
-                      isActive ? "bg-white" : null
-                    }`}
-                  ></View>
-                </View>
+                {selectedImage ? (
+                  <Image
+                    source={{ uri: selectedImage }}
+                    className="w-40 h-40 rounded-full"
+                  />
+                ) : (
+                  <View className="flex-1 justify-center items-center">
+                    <View
+                      className={`absolute bg-black w-1.5 h-20 rounded-xl ${
+                        isActive ? "bg-white" : null
+                      }`}
+                    ></View>
+                    <View
+                      className={`absolute bg-black w-20 h-1.5 rounded-xl ${
+                        isActive ? "bg-white" : null
+                      }`}
+                    ></View>
+                  </View>
+                )}
               </View>
             </TouchableOpacity>
           </View>
@@ -258,10 +303,17 @@ function AddApp({
               App Name
             </Text>
           </View>
-          <View className="bg-white shadow-lg w-96 h-12 rounded-xl">
+          <View
+            className={`shadow-lg w-96 h-12 rounded-xl ${
+              isActive ? "bg-stone-950" : "bg-white"
+            }`}
+          >
             <TextInput
-              className="p-3 font-serif italic font-bold"
+              className={`p-3 font-serif italic font-bold ${
+                isActive ? "color-white" : "color-black"
+              }`}
               placeholder="App name here"
+              placeholderTextColor={isActive ? "white" : "#666"}
               onChangeText={(newText) => {
                 setNewApp({ ...newApp, title: newText });
               }}
@@ -277,13 +329,20 @@ function AddApp({
               App Description
             </Text>
           </View>
-          <View className="bg-white shadow-lg w-96 h-32 rounded-xl">
+          <View
+            className={`shadow-lg w-96 h-32 rounded-xl ${
+              isActive ? "bg-stone-950" : "bg-white"
+            }`}
+          >
             <TextInput
-              className="p-3 font-serif italic font-bold"
+              className={`p-3 font-serif italic font-bold ${
+                isActive ? "color-white" : "color-black"
+              }`}
               textAlignVertical="top"
               multiline={true}
               numberOfLines={6}
               placeholder="App description here"
+              placeholderTextColor={isActive ? "white" : "#666"}
               onChangeText={(newText) => {
                 setNewApp({ ...newApp, desc: newText });
               }}
@@ -300,8 +359,16 @@ function AddApp({
               alignItems: "center",
             }}
           >
-            <View className="bg-white w-44 h-16 rounded-xl shadow-lg justify-center items-center">
-              <Text className="text-center font-serif font-bold">
+            <View
+              className={`w-44 h-16 rounded-xl shadow-lg justify-center items-center ${
+                isActive ? "bg-black/95" : "bg-white/95"
+              }`}
+            >
+              <Text
+                className={`text-center font-serif font-bold ${
+                  isActive ? "color-white" : "color-black"
+                }`}
+              >
                 Test Connection
               </Text>
             </View>
@@ -311,8 +378,8 @@ function AddApp({
             disabled={isGenerating}
           >
             <View
-              className={`bg-white mx-24 my-4 w-48 h-20 rounded-xl shadow-lg justify-center items-center ${
-                isActive ? "bg-black/70" : null
+              className={`mx-24 my-4 w-48 h-20 rounded-xl shadow-lg justify-center items-center ${
+                isActive ? "bg-black/95" : "bg-white/95"
               } ${isGenerating ? "opacity-50" : ""}`}
             >
               {isGenerating ? (
@@ -334,8 +401,8 @@ function AddApp({
         </View>
       </View>
       <View
-        className={`bg-white opacity-90 shadow-lg w-full h-24 items-center ${
-          isActive ? "bg-black/90" : null
+        className={`shadow-lg w-full h-24 items-center ${
+          isActive ? "bg-black/95" : "bg-white/95"
         }`}
       >
         <TouchableOpacity

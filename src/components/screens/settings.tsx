@@ -26,14 +26,14 @@ function SettingsP({
 }) {
   const { user } = db.useAuth();
   return (
-    <View className="flex-1">
+    <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
       <Image
         className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
         source={panther}
       />
       <View
-        className={`bg-white/80 shadow-lg w-full h-32 flex justify-end ${
-          isActive ? "bg-black/95 shadow-white" : null
+        className={`shadow-lg w-full h-32 flex justify-end ${
+          isActive ? "bg-black/95 !important" : "bg-white/95"
         }`}
       >
         <View className="w-full h-16 justify-center">
@@ -149,8 +149,8 @@ function SettingsP({
         </View>
       </View>
       <View
-        className={`opacity-90 shadow-lg w-full h-24 items-center ${
-          isActive ? "bg-black shadow-white" : null
+        className={`shadow-lg w-full h-24 items-center ${
+          isActive ? "bg-black/95 shadow-white" : "bg-white/95"
         } `}
       >
         <TouchableOpacity onPress={() => setPage("AddApp")}>

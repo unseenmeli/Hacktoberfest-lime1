@@ -1,0 +1,115 @@
+Starting project at /Users/unseenmeli/OneShotApp
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+The following packages should be updated for best compatibility with the installed expo version:
+  @react-native-async-storage/async-storage@2.2.0 - expected version: 2.1.2
+  expo-router@5.0.7 - expected version: ~5.1.4
+  react-native@0.79.1 - expected version: 0.79.5
+  react-native-safe-area-context@5.3.0 - expected version: 5.4.0
+  react-native-screens@4.10.0 - expected version: ~4.11.1
+Your project may not work correctly until you install the expected versions of the packages.
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 87.9% (1149/1255)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1341/1342)
+iOS node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░ 99.9% (1342/1342)
+iOS Bundled 7892ms node_modules/expo-router/entry.js (1342 modules)
+ WARN  [expo-image-picker] `ImagePicker.MediaTypeOptions` have been deprecated. Use `ImagePicker.MediaType` or an array of `ImagePicker.MediaType` instead.
+ INFO  Launching DevTools...
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ WARN  Failed to open debugger. Please check that the dev server is running and reload the app.
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 49ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 57ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 44ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS Bundled 45ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 43ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 0dae5402-7bd1-4c77-8831-bb399ab830ad
+ LOG  Sending refresh_token: 0dae5402-7bd1-4c77-8831-bb399ab830ad
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 42ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ WARN  [expo-image-picker] `ImagePicker.MediaTypeOptions` have been deprecated. Use `ImagePicker.MediaType` or an array of `ImagePicker.MediaType` instead.
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 48ms node_modules/expo-router/entry.js (1 module)
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 39ms node_modules/expo-router/entry.js (1 module)
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 42ms node_modules/expo-router/entry.js (1 module)
+ WARN  [expo-image-picker] `ImagePicker.MediaTypeOptions` have been deprecated. Use `ImagePicker.MediaType` or an array of `ImagePicker.MediaType` instead.
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+ WARN  [expo-image-picker] `ImagePicker.MediaTypeOptions` have been deprecated. Use `ImagePicker.MediaType` or an array of `ImagePicker.MediaType` instead.
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+iOS node_modules/expo-router/entry.js ░░░░░░░░░░░░░░░░  0.0% (0/1)
+iOS Bundled 45ms node_modules/expo-router/entry.js (1 module)
+ LOG  Sending refresh_token: 43ba6269-5458-4a73-b73a-f9276487534d
+RCT-Folly-Info.plist
+› Preparing Pods/React-Core-React-Core_privacy » ResourceBundle-React-Core_privacy-React-Core-Info.plist
+› Preparing Pods/EXConstants-ExpoConstants_privacy » ResourceBundle-ExpoConstants_privacy-EXConstants-Info.plist
+› Preparing Pods/React-cxxreact-React-cxxreact_privacy » ResourceBundle-React-cxxreact_privacy-React-cxxreact-Info.plist
+› Preparing Pods/ExpoFileSystem-ExpoFileSystem_privacy » ResourceBundle-ExpoFileSystem_privacy-ExpoFileSystem-Info.plist
+› Preparing expo-constants Pods/EXConstants-EXConstants » ResourceBundle-EXConstants-EXConstants-Info.plist
+› Executing react-native Pods/React-Fabric » [CP-User] [RN]Check rncore
+› Executing react-native Pods/React-RCTFBReactNativeSpec » [CP-User] [RN]Check FBReactNativeSpec
+› Executing react-native Pods/React-FabricComponents » [CP-User] [RN]Check rncore
+› Compiling oneshotapp Pods/ReactCodegen » ComponentDescriptors.cpp
+› Compiling oneshotapp Pods/ReactAppDependencyProvider » RCTAppDependencyProvider.mm
+› Compiling oneshotapp Pods/ReactCodegen » rnscreens-generated.mm
+› Compiling oneshotapp Pods/ReactCodegen » EventEmitters.cpp
+› Compiling oneshotapp Pods/ReactCodegen » EventEmitters.cpp
+› Compiling oneshotapp Pods/ReactCodegen » Props.cpp
+› Compiling oneshotapp Pods/ReactCodegen » Props.cpp
+› Compiling oneshotapp Pods/ReactCodegen » RCTModuleProviders.mm
+› Compiling oneshotapp Pods/ReactCodegen » ComponentDescriptors.cpp
+› Compiling oneshotapp Pods/ReactCodegen » ShadowNodes.cpp
+› Compiling oneshotapp Pods/ReactCodegen » RCTThirdPartyComponentsProvider.mm
+› Compiling oneshotapp Pods/ReactCodegen » ShadowNodes.cpp
+› Compiling oneshotapp Pods/ReactCodegen » safeareacontextJSI-generated.cpp
+› Compiling oneshotapp Pods/ReactCodegen » safeareacontext-generated.mm
+› Compiling oneshotapp Pods/ReactCodegen » rnscreensJSI-generated.cpp
+› Compiling oneshotapp Pods/ReactCodegen » rnreanimatedJSI-generated.cpp
+› Compiling oneshotapp Pods/ReactCodegen » rnreanimated-generated.mm
+› Compiling oneshotapp Pods/ReactCodegen » rnasyncstorageJSI-generated.cpp
+› Compiling oneshotapp Pods/ReactCodegen » rnasyncstorage-generated.mm
+› Compiling oneshotapp Pods/ReactCodegen » States.cpp
+› Compiling oneshotapp Pods/ReactCodegen » States.cpp
+› Compiling oneshotapp Pods/ReactCodegen » RCTModulesConformingToProtocolsProvider.mm
+› Packaging oneshotapp Pods/ReactCodegen » libReactCodegen.a
+› Packaging oneshotapp Pods/ReactAppDependencyProvider » libReactAppDependencyProvider.a
+› Executing expo-constants Pods/EXConstants » [CP-User] Generate app.config for prebuilt Constants.manifest
+› Executing OneShotApp » [Expo] Configure project
+› Preparing OneShotApp » Info.plist
+› Linking   OneShotApp » OneShotApp.debug.dylib
+⚠️  ld: ignoring duplicate libraries: '-lc++'
+› Generating debug OneShotApp » OneShotApp.app.dSYM
+› Linking   OneShotApp » OneShotApp
+› Generating debug OneShotApp » OneShotApp.app.dSYM
+› Executing OneShotApp » Bundle React Native code and images
+› Executing OneShotApp » [CP] Copy Pods Resources
+› Signing   OneShotApp » OneShotApp.debug.dylib
+› Signing   OneShotApp » __preview.dylib
+› Signing   OneShotApp » OneShotApp.app
+› Build Succeeded
+
+› 0 error(s), and 2 warning(s)
+
+Waiting on http://localhost:8081
+› Installing /Users/unseenmeli/Library/Developer/Xcode/DerivedData/OneShotApp-comyhtwqokwibuboniuztparfyan/Build/Products/Debug-iphonesimulator/OneShotApp.app
+› Installing on iPhone 16 Pro
+› Opening on iPhone 16 Pro (com.anonymous.OneShotApp)
+› Opening com.anonymous.OneShotApp://expo-development-client/?url=http%3A%2F%2F192.168.68.63%3A8081 on iPhone 16 Pro

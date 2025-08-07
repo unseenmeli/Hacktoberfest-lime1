@@ -1,11 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Text,
-  View,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
+import { Text, View, Image, TouchableOpacity, ScrollView } from "react-native";
 import db from "../../app/db";
 import { executeAppCode } from "../../utils/codeExecutor";
 
@@ -63,14 +57,14 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
   }
 
   return (
-    <View className="flex-1">
+    <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
       <Image
-        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10"
+        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
         source={panther}
       />
       <View
-        className={`bg-white/80 shadow-lg w-full h-32 flex justify-end ${
-          isActive ? "bg-black/95" : null
+        className={`shadow-lg w-full h-32 flex justify-end ${
+          isActive ? "bg-black/95 !important" : "bg-white/95"
         }`}
       >
         <View className="w-full h-16 justify-center">
@@ -122,8 +116,8 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
       </View>
       <View className="flex-1 items-center justify-center p-8">
         <View
-          className={`bg-white/95 shadow-lg w-full h-full rounded-xl p-4 ${
-            isActive ? "bg-black/95" : null
+          className={` shadow-lg w-full h-full rounded-xl p-4 ${
+            isActive ? "bg-black/95" : "bg-white/95"
           }`}
         >
           {codeError ? (
@@ -148,8 +142,8 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
         </View>
       </View>
       <View
-        className={`bg-white opacity-90 shadow-lg w-full h-24 items-center ${
-          isActive ? "bg-black/90" : null
+        className={` opacity-90 shadow-lg w-full h-24 items-center ${
+          isActive ? "bg-black/90" : "bg-white"
         }`}
       >
         <TouchableOpacity
