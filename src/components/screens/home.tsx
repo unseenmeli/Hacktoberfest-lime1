@@ -111,9 +111,7 @@ function Home({
                 key={element.id}
                 onPress={() => {
                   setPage(
-                    `App_${element.id}_${element.appname}_${
-                      element.appdesc
-                    }_${encodeURIComponent(element.code)}` // so basically giving a name thats connected with _ and in index.tsx we split it when _ appears into parts -- if multiple 1,2,3,4,... so on.
+                    `App_${element.id}_${encodeURIComponent(element.code)}` // so basically giving a name thats connected with _ and in index.tsx we split it when _ appears into parts -- if multiple 1,2,3,4,... so on.
                   );
                 }}
               >

@@ -60,9 +60,6 @@ export default function App() {
     const parts = page.split("_");
     const appData = {
       appId: parts[1],
-      appName: parts[2],
-      appDesc: parts[3],
-      code: decodeURIComponent(parts[4]),
     };
     return (
       <AppDetail

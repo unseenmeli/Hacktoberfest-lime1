@@ -29,6 +29,7 @@ function AddApp({
 }) {
   const [newApp, setNewApp] = useState({ title: "", desc: "" });
   const [isGenerating, setIsGenerating] = useState(false);
+  const { user } = db.useAuth();
 
   const SERVER_URL = Platform.select({
     ios: "http://localhost:3000",
@@ -37,13 +38,30 @@ function AddApp({
   });
 
   const testServerConnection = async () => {
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to access the server");
+      return;
+    }
+
     try {
-      const response = await fetch(`${SERVER_URL}/reload-instructions`);
+      const response = await fetch(`${SERVER_URL}/test-connection`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.email}`,
+        },
+        body: JSON.stringify({ email: user.email }),
+      });
       const data = await response.json();
-      Alert.alert(
-        "Success",
-        `Server is running! ${data.message || "Connected"}`
-      );
+
+      if (response.ok) {
+        Alert.alert(
+          "Success",
+          `Server is running! ${data.message || "Connected"}`
+        );
+      } else {
+        Alert.alert("Error", data.error || "Authentication failed");
+      }
     } catch (error) {
       Alert.alert(
         "Error",
@@ -53,6 +71,11 @@ function AddApp({
   };
 
   const generateAndSaveApp = async () => {
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to generate apps");
+      return;
+    }
+
     if (!newApp.desc.trim() || !newApp.title.trim()) {
       Alert.alert("Error", "Please enter both app name and description");
       return;
@@ -65,25 +88,23 @@ function AddApp({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.email}`,
         },
         body: JSON.stringify({
           description: newApp.desc,
+          email: user.email,
         }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        const newline = data.code
-          .slice(13)
-          .slice(0, data.code.slice(13).length - 3);
-
         try {
           await db.transact(
             db.tx.appslist[id()].create({
               appname: newApp.title,
               appdesc: newApp.desc,
-              code: newline,
+              code: data.code,
               logo: "",
             })
           );
