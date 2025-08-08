@@ -1,8 +1,17 @@
 {
   "expo": {
-    "scheme": "acme",
+    "name": "OneShot",
+    "slug": "OneShotApp",
+    "version": "1.0.0",
+    "scheme": "oneshot",
     "userInterfaceStyle": "automatic",
-    "orientation": "default",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "web": {
       "output": "static"
     },
@@ -14,17 +23,26 @@
         }
       ]
     ],
-    "name": "OneShotApp",
-    "slug": "OneShotApp",
     "ios": {
-      "bundleIdentifier": "fly.dev.oneshot.unseenmeli"
+      "bundleIdentifier": "fly.dev.oneshot.unseenmeli",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "OneShot needs access to your photo library to let you choose logos for your apps.",
+        "NSCameraUsageDescription": "OneShot needs access to your camera to take photos for app logos."
+      }
     },
     "android": {
-      "package": "com.anonymous.OneShotApp",
-      "buildNumber": "1" 
+      "package": "fly.dev.oneshot.unseenmeli",
+      "versionCode": 1,
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "CAMERA"
+      ]
     },
     "extra": {
-       "apiUrl": "https://one-shot.fly.dev",
+      "apiUrl": "https://one-shot.fly.dev",
       "router": {
         "origin": "https://n"
       },
