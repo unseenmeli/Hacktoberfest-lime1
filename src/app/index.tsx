@@ -43,14 +43,16 @@ export default function App() {
   }, [user, authLoading, page, hasShownLoading]);
 
   if (page === "load") {
-    return <Loading 
-      onLoadingComplete={() => {
-        setHasShownLoading(true);
-        setPage(user ? "home" : "login");
-      }}
-      isActive={isActive}
-      panther={panther}
-    />;
+    return (
+      <Loading
+        onLoadingComplete={() => {
+          setHasShownLoading(true);
+          setPage(user ? "home" : "login");
+        }}
+        isActive={isActive}
+        panther={panther}
+      />
+    );
   }
 
   if (page === "login") {

@@ -13,8 +13,11 @@ import {
   Alert,
   ActivityIndicator,
   Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import db from "../../app/db";
 import { id } from "@instantdb/react-native";
 import * as ImagePicker from "expo-image-picker";
@@ -32,11 +35,12 @@ function AddApp({
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const { user } = db.useAuth();
+  const insets = useSafeAreaInsets();
 
   const SERVER_URL = Platform.select({
-    ios: "http://localhost:3000",
-    android: "http://10.0.2.2:3000",
-    default: "http://localhost:3000",
+    ios: "https://one-shot.fly.dev",
+    android: "https://one-shot.fly.dev",
+    default: "https://one-shot.fly.dev",
   });
 
   const pickImage = async () => {
@@ -65,6 +69,9 @@ function AddApp({
   };
 
   const testServerConnection = async () => {
+    // Dismiss keyboard when pressing buttons
+    Keyboard.dismiss();
+
     if (!user) {
       Alert.alert("Error", "You must be logged in to access the server");
       return;
@@ -98,6 +105,9 @@ function AddApp({
   };
 
   const generateAndSaveApp = async () => {
+    // Dismiss keyboard when pressing submit
+    Keyboard.dismiss();
+
     if (!user) {
       Alert.alert("Error", "You must be logged in to generate apps");
       return;
@@ -144,6 +154,7 @@ function AddApp({
               appdesc: newApp.desc,
               code: data.code,
               logo: newApp.logo || "",
+              creatorId: user.id,
             })
           );
           Alert.alert("Success", "App created successfully!");
@@ -180,6 +191,7 @@ function AddApp({
         className={`shadow-lg w-full h-32 flex justify-end ${
           isActive ? "bg-black/95 !important" : "bg-white/95"
         }`}
+        style={{ paddingTop: insets.top }}
       >
         <View className="w-full h-16 justify-center">
           <View className="flex-row justify-between w-full h-12 items-center">
@@ -238,172 +250,170 @@ function AddApp({
           </View>
         </View>
       </View>
-      <View className="flex-1 items-center">
-        <View className="mx-1 p-2 flec-col gap">
-          <View className="h-72 items-center flex-row">
-            <View className="absolute -mx-2">
+      <KeyboardAwareScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+        extraScrollHeight={100}
+        extraHeight={130}
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        viewIsInsideTabBar={false}
+        showsVerticalScrollIndicator={false}
+        keyboardOpeningTime={0}
+        enableResetScrollToCoords={false}
+        automaticallyAdjustContentInsets={false}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View className="flex-1 items-center pb-32">
+          <View className="mx-1 p-2 flex-col">
+            <View className="h-72 items-center flex-row">
+              <View className="absolute -mx-2">
+                <Text
+                  className={`shadow-xl font-serif mx-36 font-bold text-8xl ${
+                    isActive ? "color-white" : null
+                  }`}
+                >
+                  Logo
+                </Text>
+              </View>
+              <View className="absolute">
+                <Text
+                  className={`shadow-xl font-serif -mx-1 font-bold text-8xl ${
+                    isActive ? "color-white" : null
+                  }`}
+                >
+                  Logo
+                </Text>
+              </View>
+              <View className="absolute">
+                <View
+                  className={`-my-20 mx-28 absolute bg-white shadow-2xl h-40 w-40 rounded-full ${
+                    isActive ? "bg-white" : null
+                  }`}
+                ></View>
+              </View>
+              <TouchableOpacity onPress={pickImage}>
+                <View
+                  className={`-my-20 mx-28 absolute shadow-2xl h-40 w-40 rounded-full ${
+                    isActive ? "bg-black" : "bg-white"
+                  } justify-center items-center`}
+                >
+                  {selectedImage ? (
+                    <Image
+                      source={{ uri: selectedImage }}
+                      className="w-40 h-40 rounded-full"
+                    />
+                  ) : (
+                    <View className="flex-1 justify-center items-center">
+                      <View
+                        className={`absolute bg-black w-1.5 h-20 rounded-xl ${
+                          isActive ? "bg-white" : null
+                        }`}
+                      ></View>
+                      <View
+                        className={`absolute bg-black w-20 h-1.5 rounded-xl ${
+                          isActive ? "bg-white" : null
+                        }`}
+                      ></View>
+                    </View>
+                  )}
+                </View>
+              </TouchableOpacity>
+            </View>
+            <View>
               <Text
-                className={`shadow-xl font-serif mx-36 font-bold text-8xl ${
+                className={`p-3 font-serif font-bold text-xl ${
                   isActive ? "color-white" : null
                 }`}
               >
-                Logo
+                App Name
               </Text>
             </View>
-            <View className="absolute">
+            <View
+              className={`shadow-lg w-96 rounded-xl ${
+                isActive ? "bg-stone-950" : "bg-white"
+              }`}
+            >
+              <TextInput
+                className={`px-4 py-3 font-serif italic font-bold ${
+                  isActive ? "color-white" : "color-black"
+                }`}
+                placeholder="App name here"
+                placeholderTextColor={isActive ? "#999" : "#666"}
+                onChangeText={(newText) => {
+                  setNewApp({ ...newApp, title: newText });
+                }}
+                value={newApp.title}
+                returnKeyType="next"
+                blurOnSubmit={false}
+              />
+            </View>
+            <View>
               <Text
-                className={`shadow-xl font-serif -mx-1 font-bold text-8xl ${
+                className={`p-3 font-serif font-bold text-xl ${
                   isActive ? "color-white" : null
                 }`}
               >
-                Logo
+                App Description
               </Text>
             </View>
-            <View className="absolute">
-              <View
-                className={`-my-20 mx-28 absolute bg-white shadow-2xl h-40 w-40 rounded-full ${
-                  isActive ? "bg-white" : null
+            <View
+              className={`shadow-lg w-96 rounded-xl ${
+                isActive ? "bg-stone-950" : "bg-white"
+              }`}
+            >
+              <TextInput
+                className={`px-4 py-3 font-serif italic font-bold ${
+                  isActive ? "color-white" : "color-black"
                 }`}
-              ></View>
+                textAlignVertical="top"
+                multiline={true}
+                numberOfLines={5}
+                placeholder="App description here"
+                placeholderTextColor={isActive ? "#999" : "#666"}
+                onChangeText={(newText) => {
+                  setNewApp({ ...newApp, desc: newText });
+                }}
+                value={newApp.desc}
+                style={{ minHeight: 120, textAlignVertical: "top" }}
+                returnKeyType="default"
+              />
             </View>
-            <TouchableOpacity onPress={pickImage}>
+            <TouchableOpacity
+              onPress={generateAndSaveApp}
+              disabled={isGenerating}
+              className="mt-4 self-center"
+            >
               <View
-                className={`-my-20 mx-28 absolute shadow-2xl h-40 w-40 rounded-full ${
-                  isActive ? "bg-black" : "bg-white"
-                } justify-center items-center`}
+                className={`w-48 h-20 rounded-xl shadow-lg justify-center items-center ${
+                  isActive ? "bg-black/95" : "bg-white/95"
+                } ${isGenerating ? "opacity-50" : ""}`}
               >
-                {selectedImage ? (
-                  <Image
-                    source={{ uri: selectedImage }}
-                    className="w-40 h-40 rounded-full"
+                {isGenerating ? (
+                  <ActivityIndicator
+                    size="small"
+                    color={isActive ? "#ffffff" : "#000000"}
                   />
                 ) : (
-                  <View className="flex-1 justify-center items-center">
-                    <View
-                      className={`absolute bg-black w-1.5 h-20 rounded-xl ${
-                        isActive ? "bg-white" : null
-                      }`}
-                    ></View>
-                    <View
-                      className={`absolute bg-black w-20 h-1.5 rounded-xl ${
-                        isActive ? "bg-white" : null
-                      }`}
-                    ></View>
-                  </View>
+                  <Text
+                    className={`font-bold font-serif text-xl ${
+                      isActive ? "color-white" : null
+                    }`}
+                  >
+                    Submit
+                  </Text>
                 )}
               </View>
             </TouchableOpacity>
           </View>
-          <View>
-            <Text
-              className={`p-3 font-serif font-bold text-xl ${
-                isActive ? "color-white" : null
-              }`}
-            >
-              App Name
-            </Text>
-          </View>
-          <View
-            className={`shadow-lg w-96 h-12 rounded-xl ${
-              isActive ? "bg-stone-950" : "bg-white"
-            }`}
-          >
-            <TextInput
-              className={`p-3 font-serif italic font-bold ${
-                isActive ? "color-white" : "color-black"
-              }`}
-              placeholder="App name here"
-              placeholderTextColor={isActive ? "white" : "#666"}
-              onChangeText={(newText) => {
-                setNewApp({ ...newApp, title: newText });
-              }}
-              value={newApp.title}
-            ></TextInput>
-          </View>
-          <View>
-            <Text
-              className={`p-3 font-serif font-bold text-xl ${
-                isActive ? "color-white" : null
-              }`}
-            >
-              App Description
-            </Text>
-          </View>
-          <View
-            className={`shadow-lg w-96 h-32 rounded-xl ${
-              isActive ? "bg-stone-950" : "bg-white"
-            }`}
-          >
-            <TextInput
-              className={`p-3 font-serif italic font-bold ${
-                isActive ? "color-white" : "color-black"
-              }`}
-              textAlignVertical="top"
-              multiline={true}
-              numberOfLines={6}
-              placeholder="App description here"
-              placeholderTextColor={isActive ? "white" : "#666"}
-              onChangeText={(newText) => {
-                setNewApp({ ...newApp, desc: newText });
-              }}
-            ></TextInput>
-          </View>
-          <TouchableOpacity
-            onPress={testServerConnection}
-            style={{
-              width: 176,
-              height: 64,
-              marginTop: 10,
-              marginBottom: -10,
-              alignSelf: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              className={`w-44 h-16 rounded-xl shadow-lg justify-center items-center ${
-                isActive ? "bg-black/95" : "bg-white/95"
-              }`}
-            >
-              <Text
-                className={`text-center font-serif font-bold ${
-                  isActive ? "color-white" : "color-black"
-                }`}
-              >
-                Test Connection
-              </Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={generateAndSaveApp}
-            disabled={isGenerating}
-          >
-            <View
-              className={`mx-24 my-4 w-48 h-20 rounded-xl shadow-lg justify-center items-center ${
-                isActive ? "bg-black/95" : "bg-white/95"
-              } ${isGenerating ? "opacity-50" : ""}`}
-            >
-              {isGenerating ? (
-                <ActivityIndicator
-                  size="small"
-                  color={isActive ? "#ffffff" : "#000000"}
-                />
-              ) : (
-                <Text
-                  className={`font-bold font-serif text-xl ${
-                    isActive ? "color-white" : null
-                  }`}
-                >
-                  Submit
-                </Text>
-              )}
-            </View>
-          </TouchableOpacity>
         </View>
-      </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAwareScrollView>
       <View
-        className={`shadow-lg w-full h-24 items-center ${
+        className={`shadow-lg w-full h-24 items-center absolute bottom-0 ${
           isActive ? "bg-black/95" : "bg-white/95"
         }`}
+        style={{ paddingBottom: insets.bottom }}
       >
         <TouchableOpacity
           onPress={() => {

@@ -18,7 +18,7 @@ const CodeGeneratorApp = () => {
   const [generatedCode, setGeneratedCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const SERVER_URL = "http://10.0.2.2:3000";
+  const SERVER_URL = "https://one-shot.fly.dev";
 
   const generateApp = async () => {
     if (!description.trim()) {

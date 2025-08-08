@@ -26,13 +26,21 @@ function Home({
   setIsActive,
 }) {
   const { width } = useWindowDimensions();
+  const { user } = db.useAuth();
 
-  const { isLoading, error, data } = db.useQuery({ appslist: {} });
+  const { isLoading, error, data } = db.useQuery(
+    user ? { 
+      appslist: { $: { where: { creatorId: user.id } } } 
+    } : null
+  );
 
-  if (isLoading) {
+  if (!user || isLoading) {
     return null;
   }
   if (error) {
+    return null;
+  }
+  if (!data || !data.appslist) {
     return null;
   }
   return (

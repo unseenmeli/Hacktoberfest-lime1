@@ -17,10 +17,20 @@
     "name": "OneShotApp",
     "slug": "OneShotApp",
     "ios": {
-      "bundleIdentifier": "com.anonymous.OneShotApp"
+      "bundleIdentifier": "fly.dev.oneshot.unseenmeli"
     },
     "android": {
-      "package": "com.anonymous.OneShotApp"
+      "package": "com.anonymous.OneShotApp",
+      "buildNumber": "1" 
+    },
+    "extra": {
+       "apiUrl": "https://one-shot.fly.dev",
+      "router": {
+        "origin": "https://n"
+      },
+      "eas": {
+        "projectId": "9034d9f8-95bd-4e17-9a11-57f3f933e7a5"
+      }
     }
   }
 }

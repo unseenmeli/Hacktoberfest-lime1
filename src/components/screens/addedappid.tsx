@@ -7,17 +7,22 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
   const { appId } = appData;
   const [codeResult, setCodeResult] = useState(null);
   const [codeError, setCodeError] = useState(null);
+  const { user } = db.useAuth();
 
-  const { isLoading, error, data } = db.useQuery({
-    appslist: {
-      $: {
-        where: {
-          id: appId,
-        },
-      },
-    },
-  });
-
+  const { isLoading, error, data } = db.useQuery(
+    user
+      ? {
+          appslist: {
+            $: {
+              where: {
+                id: appId,
+                creatorId: user.id,
+              },
+            },
+          },
+        }
+      : null
+  );
   const app = data?.appslist?.[0];
 
   const displayAppName = app?.appname;
@@ -28,7 +33,7 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
     executeAppCode(displayCode, setCodeResult, setCodeError);
   }, [displayCode]);
 
-  if (isLoading) {
+  if (!user || isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text
@@ -42,7 +47,7 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
     );
   }
 
-  if (error) {
+  if (error || !app) {
     return (
       <View className="flex-1 justify-center items-center">
         <Text
@@ -50,8 +55,17 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
             isActive ? "color-white" : "color-black"
           }`}
         >
-          Error loading app
+          {!app ? "App not found or access denied" : "Error loading app"}
         </Text>
+        <TouchableOpacity onPress={() => setPage("home")} className="mt-4">
+          <Text
+            className={`font-serif text-lg ${
+              isActive ? "color-blue-400" : "color-blue-600"
+            }`}
+          >
+            Go Back
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -100,7 +114,17 @@ function AppDetail({ appData, setPage, panther, isActive, setIsActive }) {
                 OneShot
               </Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await db.auth.signOut();
+                  setPage("login");
+                } catch (error) {
+                  console.error("Sign out error:", error);
+                  setPage("login");
+                }
+              }}
+            >
               <View className="px-4">
                 <Text
                   className={`font-serif font-bold text-xl ${

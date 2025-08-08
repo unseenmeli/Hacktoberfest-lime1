@@ -7,6 +7,7 @@ const schema = i.schema({
       appdesc: i.string(),
       code: i.string(),
       logo: i.string().optional(),
+      creatorId: i.string(),
     }),
   },
 });
