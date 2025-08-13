@@ -1,4 +1,4 @@
-package com.anonymous.OneShotApp
+package fly.dev.oneshot.unseenmeli
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

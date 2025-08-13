@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   ScrollView,
   useWindowDimensions,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
@@ -33,6 +34,32 @@ function Home({
       appslist: { $: { where: { creatorId: user.id } } } 
     } : null
   );
+
+  const handleDeleteApp = (appItem) => {
+    Alert.alert(
+      "Delete App",
+      `Are you sure you want to delete "${appItem.appname}"?`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await db.transact(db.tx.appslist[appItem.id].delete());
+              Alert.alert("Success", "App deleted successfully");
+            } catch (error) {
+              console.error("Delete app error:", error);
+              Alert.alert("Error", "Failed to delete app");
+            }
+          }
+        }
+      ]
+    );
+  };
 
   if (!user || isLoading) {
     return null;
@@ -122,6 +149,8 @@ function Home({
                     `App_${element.id}_${encodeURIComponent(element.code)}` // so basically giving a name thats connected with _ and in index.tsx we split it when _ appears into parts -- if multiple 1,2,3,4,... so on.
                   );
                 }}
+                onLongPress={() => handleDeleteApp(element)}
+                delayLongPress={500}
               >
                 <View className="items-center">
                   <View
@@ -263,7 +292,7 @@ function Home({
         </View>
       </View>
       <View
-        className={`shadow-lg w-full h-24 items-center ${
+        className={`shadow-lg w-full h-24 items-center justify-center ${
           isActive ? "bg-black/95" : "bg-white/95"
         }`}
       >
@@ -276,6 +305,13 @@ function Home({
             Apps
           </Text>
         </TouchableOpacity>
+        <Text
+          className={`font-serif text-xs ${
+            isActive ? "color-white/50" : "color-gray-400"
+          }`}
+        >
+          Long press to delete an app
+        </Text>
       </View>
     </View>
   );

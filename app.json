@@ -25,11 +25,12 @@
     ],
     "ios": {
       "bundleIdentifier": "fly.dev.oneshot.unseenmeli",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "supportsTablet": false,
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "OneShot needs access to your photo library to let you choose logos for your apps.",
-        "NSCameraUsageDescription": "OneShot needs access to your camera to take photos for app logos."
+        "NSCameraUsageDescription": "OneShot needs access to your camera to take photos for app logos.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

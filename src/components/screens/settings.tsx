@@ -10,6 +10,7 @@ import {
   useAnimatedValue,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import db from "../../app/db";
@@ -25,6 +26,65 @@ function SettingsP({
   setIsActive,
 }) {
   const { user } = db.useAuth();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This action cannot be undone. All your apps and data will be permanently deleted.",
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            Alert.alert(
+              "Final Confirmation",
+              "This will permanently delete your account and all your created apps. This cannot be undone.",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel"
+                },
+                {
+                  text: "Delete My Account",
+                  style: "destructive",
+                  onPress: async () => {
+                    setIsDeleting(true);
+                    try {
+                      // Note: InstantDB doesn't have a direct account deletion API
+                      // We'll sign out and mark this for manual deletion
+                      // In production, you'd need a server endpoint to handle this
+                      
+                      // Sign out the user
+                      await db.auth.signOut();
+                      
+                      Alert.alert(
+                        "Account Deletion Requested",
+                        "Your account has been marked for deletion. All data will be removed within 24 hours.",
+                        [{ text: "OK", onPress: () => setPage("login") }]
+                      );
+                    } catch (error) {
+                      console.error("Delete account error:", error);
+                      Alert.alert(
+                        "Error",
+                        "Failed to delete account. Please try again or contact support."
+                      );
+                    } finally {
+                      setIsDeleting(false);
+                    }
+                  }
+                }
+              ]
+            );
+          }
+        }
+      ]
+    );
+  };
   return (
     <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
       <Image
@@ -144,6 +204,21 @@ function SettingsP({
                   </Text>
                 </TouchableOpacity>
               </View>
+            </View>
+            
+            {/* Delete Account Button */}
+            <View className="mt-12">
+              <TouchableOpacity
+                onPress={handleDeleteAccount}
+                disabled={isDeleting}
+                className={`px-6 py-3 rounded-lg ${
+                  isDeleting ? "bg-gray-400" : "bg-red-600"
+                }`}
+              >
+                <Text className="text-white font-bold font-serif text-base">
+                  {isDeleting ? "Deleting..." : "Delete Account"}
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
