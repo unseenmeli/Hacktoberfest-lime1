@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
+import Friends from "./friends"; // ← add this
+import db from "../../app/db"; // ← for sign out in Settings
 import { useState } from "react";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {

@@ -1,0 +1,21 @@
+{
+  "name": "ra-scraper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "cheerio": "^1.1.2",
+    "dayjs": "^1.11.18",
+    "node-fetch": "^3.3.2",
+    "p-limit": "^7.1.1",
+    "playwright": "^1.56.1",
+    "zod": "^4.1.12"
+  }
+}
