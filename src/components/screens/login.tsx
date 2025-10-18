@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -6,23 +6,19 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Image,
 } from "react-native";
 import db from "../../app/db";
 
-function Login({ setPage, panther, isActive, setIsActive }) {
+interface LoginProps {
+  isActive: boolean;
+  setIsActive: (isActive: boolean) => void;
+}
+
+function Login({ isActive, setIsActive }: LoginProps) {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [sentEmail, setSentEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const { user, isLoading: authLoading } = db.useAuth();
-
-  useEffect(() => {
-    if (user && !authLoading) {
-      setPage("home");
-    }
-  }, [user, authLoading, setPage]);
 
   const sendMagicCode = async () => {
     if (!email.trim()) {
@@ -59,46 +55,34 @@ function Login({ setPage, panther, isActive, setIsActive }) {
     }
   };
 
-  if (authLoading) {
-    return (
-      <View className="flex-1 justify-center items-center">
-        <ActivityIndicator size="large" color={isActive ? "#ffffff" : "#000000"} />
-      </View>
-    );
-  }
-
   return (
     <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
-      <Image
-        className="flex-1 absolute rotate-90 -mx-96 p-10 -my-10 opacity-60"
-        source={panther}
-      />
       <View className="flex-1 justify-center items-center px-8">
         <View
           className={`bg-white/95 rounded-2xl shadow-2xl p-8 w-full max-w-md ${
-            isActive ? "bg-black/95" : null
+            isActive ? "bg-black/95" : ""
           }`}
         >
           <Text
             className={`font-serif font-bold text-3xl text-center mb-8 ${
-              isActive ? "color-white" : null
+              isActive ? "color-white" : ""
             }`}
           >
-            OneShot Login
+            Login
           </Text>
 
           {!sentEmail ? (
             <>
               <Text
                 className={`font-serif text-base mb-4 ${
-                  isActive ? "color-white" : null
+                  isActive ? "color-white" : ""
                 }`}
               >
                 Enter your email to get started
               </Text>
               <TextInput
                 className={`border-2 border-gray-300 rounded-xl p-4 mb-6 font-serif ${
-                  isActive ? "border-white color-white" : null
+                  isActive ? "border-white color-white" : ""
                 }`}
                 placeholder="your@email.com"
                 placeholderTextColor={isActive ? "#999" : "#666"}
@@ -112,7 +96,7 @@ function Login({ setPage, panther, isActive, setIsActive }) {
                 onPress={sendMagicCode}
                 disabled={isLoading}
                 className={`bg-black rounded-xl p-4 ${
-                  isActive ? "bg-white" : null
+                  isActive ? "bg-white" : ""
                 } ${isLoading ? "opacity-50" : ""}`}
               >
                 {isLoading ? (
@@ -120,7 +104,7 @@ function Login({ setPage, panther, isActive, setIsActive }) {
                 ) : (
                   <Text
                     className={`font-serif font-bold text-center text-white text-lg ${
-                      isActive ? "color-black" : null
+                      isActive ? "color-black" : ""
                     }`}
                   >
                     Send Magic Code
@@ -132,14 +116,14 @@ function Login({ setPage, panther, isActive, setIsActive }) {
             <>
               <Text
                 className={`font-serif text-base mb-4 ${
-                  isActive ? "color-white" : null
+                  isActive ? "color-white" : ""
                 }`}
               >
                 Enter the code sent to {sentEmail}
               </Text>
               <TextInput
                 className={`border-2 border-gray-300 rounded-xl p-4 mb-6 font-serif text-center text-2xl ${
-                  isActive ? "border-white color-white" : null
+                  isActive ? "border-white color-white" : ""
                 }`}
                 placeholder="000000"
                 placeholderTextColor={isActive ? "#999" : "#666"}
@@ -154,7 +138,7 @@ function Login({ setPage, panther, isActive, setIsActive }) {
                 onPress={signInWithCode}
                 disabled={isLoading}
                 className={`bg-black rounded-xl p-4 mb-4 ${
-                  isActive ? "bg-white" : null
+                  isActive ? "bg-white" : ""
                 } ${isLoading ? "opacity-50" : ""}`}
               >
                 {isLoading ? (
@@ -162,7 +146,7 @@ function Login({ setPage, panther, isActive, setIsActive }) {
                 ) : (
                   <Text
                     className={`font-serif font-bold text-center text-white text-lg ${
-                      isActive ? "color-black" : null
+                      isActive ? "color-black" : ""
                     }`}
                   >
                     Verify Code
@@ -185,6 +169,19 @@ function Login({ setPage, panther, isActive, setIsActive }) {
               </TouchableOpacity>
             </>
           )}
+
+          <TouchableOpacity
+            onPress={() => setIsActive(!isActive)}
+            className="mt-6"
+          >
+            <Text
+              className={`font-serif text-center ${
+                isActive ? "color-white" : "color-gray-600"
+              }`}
+            >
+              Toggle {isActive ? "Light" : "Dark"} Mode
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

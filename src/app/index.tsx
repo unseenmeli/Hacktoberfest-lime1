@@ -1,122 +1,62 @@
-import { transform } from "@babel/core";
-import { Link } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
-import {
-  ImageBackground,
-  Text,
-  View,
-  Image,
-  Animated,
-  useAnimatedValue,
-  TouchableOpacity,
-  TextInput,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import Loading from "../components/screens/loading";
+import { useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import Login from "../components/screens/login";
-import Home from "../components/screens/home";
-import AddApp from "../components/screens/addapp";
-import AppDetail from "../components/screens/addedappid";
-import SettingsP from "@/components/screens/settings";
-import { init, i, InstaQLEntity, id } from "@instantdb/react-native";
 import db from "./db";
 
 export default function App() {
-  const [page, setPage] = useState("load");
-  const [apps, setApps] = useState([]);
   const [isActive, setIsActive] = useState(false);
-  const [hasShownLoading, setHasShownLoading] = useState(false);
-  const lightpanther = require("../media/panther.jpg");
-  const darkpanther = require("../media/panther1.png");
-
-  const panther = isActive ? darkpanther : lightpanther;
   const { user, isLoading: authLoading } = db.useAuth();
 
-  React.useEffect(() => {
-    if (!authLoading && page === "load" && hasShownLoading) {
-      if (!user) {
-        setPage("login");
-      } else {
-        setPage("home");
-      }
-    }
-  }, [user, authLoading, page, hasShownLoading]);
+  const handleSignOut = async () => {
+    await db.auth.signOut();
+  };
 
-  if (page === "load") {
+  if (authLoading) {
     return (
-      <Loading
-        onLoadingComplete={() => {
-          setHasShownLoading(true);
-          setPage(user ? "home" : "login");
-        }}
-        isActive={isActive}
-        panther={panther}
-      />
+      <View className="flex-1 justify-center items-center bg-white">
+        <Text className="font-serif text-xl">Loading...</Text>
+      </View>
     );
   }
 
-  if (page === "login") {
+  if (!user) {
     return (
       <Login
-        setPage={setPage}
-        panther={panther}
         isActive={isActive}
         setIsActive={setIsActive}
       />
     );
   }
 
-  if (page.startsWith("App_")) {
-    const parts = page.split("_");
-    const appData = {
-      appId: parts[1],
-    };
-    return (
-      <AppDetail
-        appData={appData}
-        setPage={setPage}
-        panther={panther}
-        isActive={isActive}
-        setIsActive={setIsActive}
-      />
-    );
-  }
-
-  if (page === "AddApp") {
-    return (
-      <AddApp
-        page={page}
-        setPage={setPage}
-        panther={panther}
-        apps={apps}
-        setApps={setApps}
-        isActive={isActive}
-        setIsActive={setIsActive}
-      />
-    );
-  }
-
-  if (page === "settings")
-    return (
-      <SettingsP
-        panther={panther}
-        page={page}
-        setPage={setPage}
-        apps={apps}
-        setApps={setApps}
-        isActive={isActive}
-        setIsActive={setIsActive}
-      />
-    );
   return (
-    <Home
-      panther={panther}
-      page={page}
-      setPage={setPage}
-      apps={apps}
-      setApps={setApps}
-      isActive={isActive}
-      setIsActive={setIsActive}
-    />
+    <View className={`flex-1 justify-center items-center ${isActive ? "bg-black" : "bg-white"}`}>
+      <View className={`bg-white/95 rounded-2xl shadow-2xl p-8 w-full max-w-md mx-8 ${isActive ? "bg-black/95" : ""}`}>
+        <Text className={`font-serif font-bold text-3xl text-center mb-8 ${isActive ? "color-white" : ""}`}>
+          Welcome!
+        </Text>
+        <Text className={`font-serif text-base mb-6 text-center ${isActive ? "color-white" : ""}`}>
+          You are logged in as:
+        </Text>
+        <Text className={`font-serif text-lg mb-8 text-center font-bold ${isActive ? "color-white" : ""}`}>
+          {user.email}
+        </Text>
+        <TouchableOpacity
+          onPress={handleSignOut}
+          className={`bg-black rounded-xl p-4 ${isActive ? "bg-white" : ""}`}
+        >
+          <Text className={`font-serif font-bold text-center text-white text-lg ${isActive ? "color-black" : ""}`}>
+            Sign Out
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setIsActive(!isActive)}
+          className="mt-6"
+        >
+          <Text className={`font-serif text-center ${isActive ? "color-white" : "color-gray-600"}`}>
+            Toggle {isActive ? "Light" : "Dark"} Mode
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
