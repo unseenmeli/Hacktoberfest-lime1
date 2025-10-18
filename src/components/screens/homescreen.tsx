@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   ScrollView,
 } from "react-native";
-import Friends from "./friends"; // ← add this
-import db from "../../app/db"; // ← for sign out in Settings
+import Friends from "./friends";
+import Settings from "./settings";
+import db from "../../app/db";
 import { useState } from "react";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Animated, {
@@ -24,7 +25,6 @@ import Animated, {
 const { height, width } = Dimensions.get("window");
 const SWIPE_THRESHOLD = width * 0.3;
 
-// Sample cards data
 const CARDS_DATA = [
   {
     id: 1,
@@ -97,6 +97,14 @@ export default function Home() {
 
   const currentCard = CARDS_DATA[currentIndex];
 
+  if (activeTab === "friends") {
+    return <Friends activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
+  if (activeTab === "settings") {
+    return <Settings activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
   return (
     <View className="flex-1 relative bg-black">
       {currentIndex >= CARDS_DATA.length ? (
@@ -106,7 +114,6 @@ export default function Home() {
         </View>
       ) : (
         <>
-          {/* Black background */}
           <View
             className="absolute bg-black"
             style={{
@@ -201,10 +208,10 @@ export default function Home() {
               />
             </View>
             <Text
-              className="text-xs text-white"
-              style={{ marginTop: 2, opacity: activeTab === "home" ? 1 : 0.5 }}
+              className="text-xs text-white uppercase"
+              style={{ marginTop: 2, opacity: activeTab === "home" ? 1 : 0.5, fontWeight: "700" }}
             >
-              Home
+              HOME
             </Text>
           </TouchableOpacity>
 
@@ -234,13 +241,14 @@ export default function Home() {
               />
             </View>
             <Text
-              className="text-xs text-white"
+              className="text-xs text-white uppercase"
               style={{
                 marginTop: 2,
                 opacity: activeTab === "friends" ? 1 : 0.5,
+                fontWeight: "700",
               }}
             >
-              Friends
+              FRIENDS
             </Text>
           </TouchableOpacity>
 
@@ -270,13 +278,14 @@ export default function Home() {
               />
             </View>
             <Text
-              className="text-xs text-white"
+              className="text-xs text-white uppercase"
               style={{
                 marginTop: 2,
                 opacity: activeTab === "settings" ? 1 : 0.5,
+                fontWeight: "700",
               }}
             >
-              Settings
+              SETTINGS
             </Text>
           </TouchableOpacity>
         </View>
@@ -312,7 +321,6 @@ function SwipeCard({
       translateY.value = event.translationY;
     })
     .onEnd(() => {
-      // Check for swipe up
       if (translateY.value < -100) {
         runOnJS(onSwipeUp)();
         translateX.value = withSpring(0);
@@ -320,7 +328,6 @@ function SwipeCard({
         return;
       }
 
-      // Check for swipe left (Nope)
       if (translateX.value < -SWIPE_THRESHOLD) {
         translateX.value = withTiming(-width * 1.5, { duration: 300 }, () => {
           runOnJS(onSwipeLeft)();
@@ -329,7 +336,6 @@ function SwipeCard({
         return;
       }
 
-      // Check for swipe right (Like)
       if (translateX.value > SWIPE_THRESHOLD) {
         translateX.value = withTiming(width * 1.5, { duration: 300 }, () => {
           runOnJS(onSwipeRight)();
@@ -338,7 +344,6 @@ function SwipeCard({
         return;
       }
 
-      // Return to center
       translateX.value = withSpring(0);
       translateY.value = withSpring(0);
     });
@@ -406,7 +411,6 @@ function SwipeCard({
             />
           </View>
 
-          {/* LIKE label */}
           <Animated.View
             style={[
               likeOpacityStyle,
@@ -423,7 +427,6 @@ function SwipeCard({
             </View>
           </Animated.View>
 
-          {/* NOPE label */}
           <Animated.View
             style={[
               nopeOpacityStyle,
@@ -442,7 +445,6 @@ function SwipeCard({
         </Animated.View>
       </GestureDetector>
 
-      {/* Detail Panel */}
       {showDetails && (
         <View
           className="absolute left-0 right-0 bg-black z-[50]"
@@ -452,7 +454,6 @@ function SwipeCard({
           }}
         >
           <View className="flex-1 pt-16 px-8">
-            {/* Close Button */}
             <TouchableOpacity
               onPress={closeDetailPanel}
               className="self-end mb-8"
@@ -463,7 +464,6 @@ function SwipeCard({
               </View>
             </TouchableOpacity>
 
-            {/* Event Details */}
             <ScrollView
               showsVerticalScrollIndicator={false}
               className="flex-1"

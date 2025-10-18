@@ -7,12 +7,18 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
+  Image,
 } from "react-native";
 import db from "../../app/db";
 import useEnsureProfile from "../../lib/useEnsureProfile";
 import { id } from "@instantdb/react-native";
 
-export default function Friends() {
+interface FriendsProps {
+  activeTab?: string;
+  setActiveTab?: (tab: string) => void;
+}
+
+export default function Friends({ activeTab = "friends", setActiveTab }: FriendsProps) {
   useEnsureProfile();
 
   const { user } = db.useAuth();
@@ -181,144 +187,397 @@ export default function Friends() {
 
   if (meLoading) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <ActivityIndicator />
+      <View className="flex-1 items-center justify-center bg-black">
+        <ActivityIndicator color="#ffffff" />
       </View>
     );
   }
   if (meError) {
     return (
-      <View className="p-4">
+      <View className="p-4 bg-black flex-1">
         <Text className="text-red-500">Error: {meError.message}</Text>
       </View>
     );
   }
 
   return (
-    <View className="flex-1 p-6">
-      {/* Add Friend */}
-      <View className="mb-6">
-        <Text className="text-white/90 text-lg mb-2">Add friend by email</Text>
-        <TextInput
-          className="border border-white/20 rounded-xl px-4 py-3 text-white"
-          placeholder="friend@example.com"
-          placeholderTextColor="#9ca3af"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          editable={!busy}
+    <View className="flex-1 bg-black">
+      <View className="flex-1 px-8 pt-16" style={{ paddingBottom: 140 }}>
+        {/* Header */}
+        <Text
+          className="text-white uppercase mb-8"
+          style={{
+            fontSize: 48,
+            fontWeight: "900",
+            letterSpacing: -2,
+            textShadowColor: "rgba(0,0,0,0.8)",
+            textShadowOffset: { width: 0, height: 4 },
+            textShadowRadius: 12,
+          }}
+        >
+          FRIENDS
+        </Text>
+
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          ListHeaderComponent={
+            <>
+              {/* Add Friend Section */}
+              <View className="mb-10">
+                <Text
+                  className="text-white/60 uppercase mb-4"
+                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                >
+                  Add New Friend
+                </Text>
+                <TextInput
+                  className="border border-white/20 rounded-2xl px-6 py-5 text-white bg-white/5 mb-4"
+                  placeholder="friend@example.com"
+                  placeholderTextColor="#6b7280"
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  value={email}
+                  onChangeText={setEmail}
+                  editable={!busy}
+                  style={{ fontSize: 16, fontWeight: "500" }}
+                />
+
+                {(alreadyFriend || isSelf || targetProfile || emailLower.length > 0) && (
+                  <View className="mb-4">
+                    {alreadyFriend ? (
+                      <Text className="text-white/70" style={{ fontSize: 14 }}>
+                        ✓ Already your friend
+                      </Text>
+                    ) : isSelf ? (
+                      <Text className="text-white/70" style={{ fontSize: 14 }}>
+                        That's you
+                      </Text>
+                    ) : targetProfile ? (
+                      <Text className="text-white/80" style={{ fontSize: 14 }}>
+                        Found:{" "}
+                        <Text className="font-semibold">{targetProfile.nickname}</Text>
+                      </Text>
+                    ) : emailLower.length > 0 ? (
+                      <Text className="text-white/60" style={{ fontSize: 14 }}>
+                        Will create new profile
+                      </Text>
+                    ) : null}
+                  </View>
+                )}
+
+                <TouchableOpacity
+                  disabled={!canSubmit || busy || alreadyFriend || isSelf}
+                  onPress={handleAddByEmail}
+                  className={`rounded-full py-5 items-center ${
+                    !canSubmit || busy || alreadyFriend || isSelf
+                      ? "bg-white/20"
+                      : "bg-white"
+                  }`}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    className="uppercase"
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "800",
+                      letterSpacing: 1,
+                      color:
+                        !canSubmit || busy || alreadyFriend || isSelf
+                          ? "rgba(255,255,255,0.6)"
+                          : "#000000",
+                    }}
+                  >
+                    {busy ? "Adding..." : "Add Friend"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Friend Requests */}
+              {incomingRequests.length > 0 && (
+                <View className="mb-10">
+                  <Text
+                    className="text-white/60 uppercase mb-4"
+                    style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                  >
+                    Requests ({incomingRequests.length})
+                  </Text>
+                  {incomingRequests.map((item: any) => (
+                    <View
+                      key={item.id}
+                      className="mb-4 bg-white/5 rounded-2xl p-5 border border-white/10"
+                    >
+                      <View className="flex-row items-center justify-between mb-4">
+                        <View className="flex-1">
+                          <Text
+                            className="text-white uppercase"
+                            style={{
+                              fontSize: 20,
+                              fontWeight: "800",
+                              letterSpacing: -0.5,
+                            }}
+                          >
+                            {item.nickname}
+                          </Text>
+                          {item.emailLower && (
+                            <Text
+                              className="text-white/50 mt-1"
+                              style={{ fontSize: 13 }}
+                            >
+                              {item.emailLower}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                      <View className="flex-row gap-3">
+                        <TouchableOpacity
+                          disabled={busy}
+                          onPress={() => handleAccept(item.id)}
+                          className="flex-1 bg-white rounded-full py-4 items-center"
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            className="text-black uppercase"
+                            style={{ fontSize: 14, fontWeight: "800", letterSpacing: 1 }}
+                          >
+                            Accept
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          disabled={busy}
+                          onPress={() => handleDecline(item.id)}
+                          className="flex-1 bg-white/10 rounded-full py-4 items-center border border-white/20"
+                          activeOpacity={0.8}
+                        >
+                          <Text
+                            className="text-white uppercase"
+                            style={{ fontSize: 14, fontWeight: "800", letterSpacing: 1 }}
+                          >
+                            Decline
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {/* Your Friends Header */}
+              <Text
+                className="text-white/60 uppercase mb-4"
+                style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+              >
+                Friends ({myFriends.length})
+              </Text>
+            </>
+          }
+          data={myFriends}
+          keyExtractor={(item: any) => item.id}
+          ListEmptyComponent={
+            <View className="py-12 items-center">
+              <Text
+                className="text-white/40 text-center"
+                style={{ fontSize: 16, fontWeight: "500" }}
+              >
+                No friends yet.{"\n"}Add someone to get started!
+              </Text>
+            </View>
+          }
+          renderItem={({ item }: any) => (
+            <View className="mb-4 flex-row items-start">
+              {/* Profile Picture */}
+              <View
+                className="w-16 h-16 rounded-full bg-white/10 items-center justify-center border border-white/20 mr-4"
+                style={{
+                  overflow: "hidden",
+                }}
+              >
+                <Text
+                  className="text-white uppercase"
+                  style={{
+                    fontSize: 24,
+                    fontWeight: "800",
+                  }}
+                >
+                  {item.nickname ? item.nickname.charAt(0).toUpperCase() : "?"}
+                </Text>
+              </View>
+
+              {/* Name and Unfriend Button Column */}
+              <View className="flex-1 flex-col">
+                {/* Name and Info */}
+                <View className="flex-row items-center mb-2">
+                  <Text
+                    className="text-white uppercase"
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "800",
+                      letterSpacing: -0.5,
+                    }}
+                  >
+                    {item.nickname}
+                  </Text>
+                  {!myFriendsOf.some((p: any) => p.id === item.id) && (
+                    <View
+                      className="rounded-full ml-2 border border-yellow-500/30"
+                      style={{
+                        backgroundColor: "rgba(234, 179, 8, 0.15)",
+                        paddingHorizontal: 8,
+                        paddingVertical: 2,
+                      }}
+                    >
+                      <Text
+                        className="text-yellow-500 uppercase"
+                        style={{
+                          fontSize: 9,
+                          fontWeight: "700",
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        Pending
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                {item.emailLower && (
+                  <Text className="text-white/50 mb-2" style={{ fontSize: 12 }}>
+                    {item.emailLower}
+                  </Text>
+                )}
+
+                {/* Unfriend Button */}
+                <TouchableOpacity
+                  disabled={busy}
+                  onPress={() => handleUnfriend(item.id)}
+                  className="bg-red-500/10 rounded-full py-2 items-center border border-red-500/30"
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    className="text-red-400 uppercase"
+                    style={{ fontSize: 12, fontWeight: "800", letterSpacing: 0.5 }}
+                  >
+                    Unfriend
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
         />
-        <View className="mt-3 flex-row items-center">
+      </View>
+
+      {/* Footer Navigation */}
+      <View
+        className="absolute bottom-0 left-0 right-0 bg-black border-t border-gray-500 z-10"
+        style={{ paddingBottom: 20, paddingTop: 15 }}
+      >
+        <View className="flex-row justify-around items-center px-8">
           <TouchableOpacity
-            disabled={!canSubmit || busy || alreadyFriend || isSelf}
-            onPress={handleAddByEmail}
-            className={`px-4 py-3 rounded-xl ${
-              !canSubmit || busy || alreadyFriend || isSelf
-                ? "bg-white/20"
-                : "bg-white"
-            }`}
+            onPress={() => setActiveTab?.("home")}
+            className="items-center flex-1"
+            activeOpacity={1}
           >
-            <Text
-              className={`font-semibold ${
-                !canSubmit || busy || alreadyFriend || isSelf
-                  ? "text-white/60"
-                  : "text-black"
-              }`}
+            <View
+              className="w-16 h-16 rounded-full items-center justify-center"
+              style={{
+                backgroundColor:
+                  activeTab === "home"
+                    ? "rgba(255,255,255,0.15)"
+                    : "transparent",
+              }}
             >
-              {busy ? "Working..." : "Add Friend"}
+              <Image
+                source={require("../../media/home.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  tintColor: "#ffffff",
+                  resizeMode: "contain",
+                  opacity: activeTab === "home" ? 1 : 0.5,
+                }}
+              />
+            </View>
+            <Text
+              className="text-xs text-white uppercase"
+              style={{ marginTop: 2, opacity: activeTab === "home" ? 1 : 0.5, fontWeight: "700" }}
+            >
+              HOME
             </Text>
           </TouchableOpacity>
 
-          <View className="ml-3">
-            {alreadyFriend ? (
-              <Text className="text-white/70">Already your friend</Text>
-            ) : isSelf ? (
-              <Text className="text-white/70">That’s you 🙂</Text>
-            ) : targetProfile ? (
-              <Text className="text-white/80">
-                Found:{" "}
-                <Text className="font-semibold">{targetProfile.nickname}</Text>
-              </Text>
-            ) : emailLower.length > 0 ? (
-              <Text className="text-white/60">Will create a stub profile</Text>
-            ) : null}
-          </View>
+          <TouchableOpacity
+            onPress={() => setActiveTab?.("friends")}
+            className="items-center flex-1"
+            activeOpacity={1}
+          >
+            <View
+              className="w-16 h-16 rounded-full items-center justify-center"
+              style={{
+                backgroundColor:
+                  activeTab === "friends"
+                    ? "rgba(255,255,255,0.15)"
+                    : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../media/chaticon.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  tintColor: "#ffffff",
+                  resizeMode: "contain",
+                  opacity: activeTab === "friends" ? 1 : 0.5,
+                }}
+              />
+            </View>
+            <Text
+              className="text-xs text-white uppercase"
+              style={{
+                marginTop: 2,
+                opacity: activeTab === "friends" ? 1 : 0.5,
+                fontWeight: "700",
+              }}
+            >
+              FRIENDS
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setActiveTab?.("settings")}
+            className="items-center flex-1"
+            activeOpacity={1}
+          >
+            <View
+              className="w-16 h-16 rounded-full items-center justify-center"
+              style={{
+                backgroundColor:
+                  activeTab === "settings"
+                    ? "rgba(255,255,255,0.15)"
+                    : "transparent",
+              }}
+            >
+              <Image
+                source={require("../../media/settings.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  tintColor: "#ffffff",
+                  resizeMode: "contain",
+                  opacity: activeTab === "settings" ? 1 : 0.5,
+                }}
+              />
+            </View>
+            <Text
+              className="text-xs text-white uppercase"
+              style={{
+                marginTop: 2,
+                opacity: activeTab === "settings" ? 1 : 0.5,
+                fontWeight: "700",
+              }}
+            >
+              SETTINGS
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-
-      {/* Incoming Requests */}
-      <View className="mb-6">
-        <Text className="text-white/90 text-lg mb-2">
-          Friend Requests ({incomingRequests.length})
-        </Text>
-        {incomingRequests.length === 0 ? (
-          <Text className="text-white/60">No incoming requests.</Text>
-        ) : (
-          <FlatList
-            data={incomingRequests}
-            keyExtractor={(item: any) => item.id}
-            renderItem={({ item }: any) => (
-              <View className="flex-row items-center justify-between py-3 border-b border-white/10">
-                <View>
-                  <Text className="text-white font-semibold">
-                    {item.nickname}
-                  </Text>
-                  {item.emailLower ? (
-                    <Text className="text-white/50 text-xs">
-                      {item.emailLower}
-                    </Text>
-                  ) : null}
-                </View>
-                <TouchableOpacity
-                  disabled={busy}
-                  onPress={() => handleAccept(item.id)}
-                  className="px-3 py-2 rounded-lg bg-white"
-                >
-                  <Text className="text-black font-semibold">Accept</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  disabled={busy}
-                  onPress={() => handleDecline(item.id)}
-                  className="px-3 py-2 rounded-lg bg-white/10 mr-2"
-                >
-                  <Text className="text-white/90">Decline</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          />
-        )}
-      </View>
-
-      {/* Your Friends */}
-      <Text className="text-white/90 text-lg mb-2">Your Friends</Text>
-      <FlatList
-        data={myFriends}
-        keyExtractor={(item: any) => item.id}
-        ListEmptyComponent={
-          <Text className="text-white/60">You don’t have any friends yet.</Text>
-        }
-        renderItem={({ item }: any) => (
-          <View className="flex-row items-center justify-between py-3 border-b border-white/10">
-            <View>
-              <Text className="text-white font-semibold">{item.nickname}</Text>
-              {item.emailLower ? (
-                <Text className="text-white/50 text-xs">{item.emailLower}</Text>
-              ) : null}
-              {!myFriendsOf.some((p: any) => p.id === item.id) ? (
-                <Text className="text-white/50 text-xs mt-1">Pending</Text>
-              ) : null}
-            </View>
-            <TouchableOpacity
-              disabled={busy}
-              onPress={() => handleUnfriend(item.id)}
-              className="px-3 py-2 rounded-lg bg-white/10"
-            >
-              <Text className="text-white/90">Unfriend</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
     </View>
   );
 }
