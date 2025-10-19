@@ -6,8 +6,11 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import db from "../../app/db";
+
+const { width } = Dimensions.get("window");
 
 interface LoginProps {
   isActive: boolean;
@@ -56,56 +59,70 @@ function Login({ isActive, setIsActive }: LoginProps) {
   };
 
   return (
-    <View className={`flex-1 ${isActive ? "bg-black" : "bg-white"}`}>
+    <View className="flex-1 bg-black">
       <View className="flex-1 justify-center items-center px-8">
-        <View
-          className={`bg-white/95 rounded-2xl shadow-2xl p-8 w-full max-w-md ${
-            isActive ? "bg-black/95" : ""
-          }`}
-        >
+        {/* Logo/Title Section */}
+        <View className="mb-12">
           <Text
-            className={`font-serif font-bold text-3xl text-center mb-8 ${
-              isActive ? "color-white" : ""
-            }`}
+            className="text-white uppercase text-center"
+            style={{
+              fontSize: 56,
+              fontWeight: "900",
+              letterSpacing: -2,
+            }}
           >
-            Login
+            SWIPE
           </Text>
+          <Text
+            className="text-white/60 uppercase text-center mt-2"
+            style={{
+              fontSize: 12,
+              fontWeight: "600",
+              letterSpacing: 2,
+            }}
+          >
+            Event Discovery
+          </Text>
+        </View>
 
+        {/* Login Form */}
+        <View className="w-full max-w-md">
           {!sentEmail ? (
             <>
               <Text
-                className={`font-serif text-base mb-4 ${
-                  isActive ? "color-white" : ""
-                }`}
+                className="text-white/60 uppercase mb-4"
+                style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
               >
-                Enter your email to get started
+                Enter Your Email
               </Text>
               <TextInput
-                className={`border-2 border-gray-300 rounded-xl p-4 mb-6 font-serif ${
-                  isActive ? "border-white color-white" : ""
-                }`}
+                className="bg-white/5 rounded-2xl p-5 mb-6 text-white border border-white/10"
                 placeholder="your@email.com"
-                placeholderTextColor={isActive ? "#999" : "#666"}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={!isLoading}
+                style={{
+                  fontSize: 16,
+                  fontWeight: "500",
+                }}
               />
               <TouchableOpacity
                 onPress={sendMagicCode}
                 disabled={isLoading}
-                className={`bg-black rounded-xl p-4 ${
-                  isActive ? "bg-white" : ""
-                } ${isLoading ? "opacity-50" : ""}`}
+                className={`bg-white rounded-full py-5 items-center ${
+                  isLoading ? "opacity-50" : ""
+                }`}
+                activeOpacity={0.8}
               >
                 {isLoading ? (
-                  <ActivityIndicator color={isActive ? "#000000" : "#ffffff"} />
+                  <ActivityIndicator color="#000000" />
                 ) : (
                   <Text
-                    className={`font-serif font-bold text-center text-white text-lg ${
-                      isActive ? "color-black" : ""
-                    }`}
+                    className="text-black uppercase"
+                    style={{ fontSize: 16, fontWeight: "800", letterSpacing: 1 }}
                   >
                     Send Magic Code
                   </Text>
@@ -115,39 +132,47 @@ function Login({ isActive, setIsActive }: LoginProps) {
           ) : (
             <>
               <Text
-                className={`font-serif text-base mb-4 ${
-                  isActive ? "color-white" : ""
-                }`}
+                className="text-white/60 uppercase mb-4"
+                style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
               >
-                Enter the code sent to {sentEmail}
+                Enter Verification Code
+              </Text>
+              <Text
+                className="text-white/40 mb-4"
+                style={{ fontSize: 14, fontWeight: "400" }}
+              >
+                Sent to {sentEmail}
               </Text>
               <TextInput
-                className={`border-2 border-gray-300 rounded-xl p-4 mb-6 font-serif text-center text-2xl ${
-                  isActive ? "border-white color-white" : ""
-                }`}
+                className="bg-white/5 rounded-2xl p-5 mb-6 text-white border border-white/10 text-center"
                 placeholder="000000"
-                placeholderTextColor={isActive ? "#999" : "#666"}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={code}
                 onChangeText={setCode}
                 keyboardType="numeric"
                 maxLength={6}
                 autoFocus
                 editable={!isLoading}
+                style={{
+                  fontSize: 32,
+                  fontWeight: "700",
+                  letterSpacing: 8,
+                }}
               />
               <TouchableOpacity
                 onPress={signInWithCode}
                 disabled={isLoading}
-                className={`bg-black rounded-xl p-4 mb-4 ${
-                  isActive ? "bg-white" : ""
-                } ${isLoading ? "opacity-50" : ""}`}
+                className={`bg-white rounded-full py-5 items-center mb-4 ${
+                  isLoading ? "opacity-50" : ""
+                }`}
+                activeOpacity={0.8}
               >
                 {isLoading ? (
-                  <ActivityIndicator color={isActive ? "#000000" : "#ffffff"} />
+                  <ActivityIndicator color="#000000" />
                 ) : (
                   <Text
-                    className={`font-serif font-bold text-center text-white text-lg ${
-                      isActive ? "color-black" : ""
-                    }`}
+                    className="text-black uppercase"
+                    style={{ fontSize: 16, fontWeight: "800", letterSpacing: 1 }}
                   >
                     Verify Code
                   </Text>
@@ -158,30 +183,28 @@ function Login({ isActive, setIsActive }: LoginProps) {
                   setSentEmail("");
                   setCode("");
                 }}
+                className="py-3"
+                activeOpacity={0.7}
               >
                 <Text
-                  className={`font-serif text-center ${
-                    isActive ? "color-white" : "color-gray-600"
-                  }`}
+                  className="text-white/60 text-center uppercase"
+                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1 }}
                 >
-                  Use different email
+                  Use Different Email
                 </Text>
               </TouchableOpacity>
             </>
           )}
+        </View>
 
-          <TouchableOpacity
-            onPress={() => setIsActive(!isActive)}
-            className="mt-6"
+        {/* Footer */}
+        <View className="absolute bottom-12">
+          <Text
+            className="text-white/30 text-center uppercase"
+            style={{ fontSize: 10, fontWeight: "600", letterSpacing: 2 }}
           >
-            <Text
-              className={`font-serif text-center ${
-                isActive ? "color-white" : "color-gray-600"
-              }`}
-            >
-              Toggle {isActive ? "Light" : "Dark"} Mode
-            </Text>
-          </TouchableOpacity>
+            Discover • Connect • Experience
+          </Text>
         </View>
       </View>
     </View>

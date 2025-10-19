@@ -18,7 +18,10 @@ interface FriendsProps {
   setActiveTab?: (tab: string) => void;
 }
 
-export default function Friends({ activeTab = "friends", setActiveTab }: FriendsProps) {
+export default function Friends({
+  activeTab = "friends",
+  setActiveTab,
+}: FriendsProps) {
   useEnsureProfile();
 
   const { user } = db.useAuth();
@@ -62,6 +65,8 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const emailLower = email.trim().toLowerCase();
   const canSubmit = !!myProfileId && emailLower.length > 3;
+
+  const [friendSearch, setFriendSearch] = useState(false);
 
   // Prefer an OWNED profile with this email (joined via $user.email)
   const byUserQuery = emailLower
@@ -204,11 +209,50 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
 
   return (
     <View className="flex-1 bg-black">
-
+      {friendSearch && (
+        <>
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0, 0, 0, 0.98)",
+              zIndex: 5,
+            }}
+          />
+          <View
+            style={{
+              position: "absolute",
+              top: "20%",
+              left: 32,
+              right: 32,
+              zIndex: 10,
+            }}
+          >
+            <TextInput
+              className="border border-white/20 rounded-2xl px-6 py-5 text-white bg-white/5 w-full"
+              placeholder="friend@example.com"
+              placeholderTextColor="#6b7280"
+              autoCapitalize="none"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+              editable={!busy}
+              onSubmitEditing={handleAddByEmail}
+              returnKeyType="done"
+              style={{ fontSize: 16, fontWeight: "500" }}
+              autoFocus={true}
+              onBlur={() => setFriendSearch(false)}
+            />
+          </View>
+        </>
+      )}
       <View className="flex-1 px-8 pt-16" style={{ paddingBottom: 140 }}>
         {/* Header */}
         <Text
-          className="text-white uppercase mb-8"
+          className="text-white uppercase mb-8 z-10"
           style={{
             fontSize: 48,
             fontWeight: "900",
@@ -230,15 +274,21 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
               <View className="mb-10">
                 <Text
                   className="text-white/60 uppercase mb-4"
-                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    letterSpacing: 1.5,
+                  }}
                 >
                   Add New Friend
                 </Text>
-                {!isSearchFocused ? (
-                  <TouchableOpacity
-                    onPress={() => setIsSearchFocused(true)}
+                <TouchableOpacity
+                  onPress={() => setFriendSearch(true)}
+                  activeOpacity={0.7}
+                >
+                  <View
                     className="border border-white/20 rounded-2xl px-6 py-5 bg-white/5"
-                    activeOpacity={0.8}
+                    pointerEvents="none"
                   >
                     <Text
                       className="text-white/50"
@@ -246,95 +296,8 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                     >
                       friend@example.com
                     </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <View className="bg-black/90 rounded-2xl p-6 border border-white/20">
-                    <View className="flex-row items-center justify-between mb-4">
-                      <Text
-                        className="text-white uppercase"
-                        style={{
-                          fontSize: 24,
-                          fontWeight: "900",
-                          letterSpacing: -1,
-                        }}
-                      >
-                        Add Friend
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => {
-                          setIsSearchFocused(false);
-                          setEmail("");
-                        }}
-                        className="w-10 h-10 rounded-full bg-white/10 items-center justify-center"
-                        activeOpacity={0.7}
-                      >
-                        <Text className="text-white text-xl">✕</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    <TextInput
-                      className="border border-white/20 rounded-2xl px-6 py-5 text-white bg-white/5 mb-4"
-                      placeholder="friend@example.com"
-                      placeholderTextColor="#6b7280"
-                      autoCapitalize="none"
-                      keyboardType="email-address"
-                      value={email}
-                      onChangeText={setEmail}
-                      editable={!busy}
-                      autoFocus={true}
-                      style={{ fontSize: 16, fontWeight: "500" }}
-                    />
-
-                    {(alreadyFriend || isSelf || targetProfile || emailLower.length > 0) && (
-                      <View className="mb-4">
-                        {alreadyFriend ? (
-                          <Text className="text-white/70" style={{ fontSize: 14 }}>
-                            ✓ Already your friend
-                          </Text>
-                        ) : isSelf ? (
-                          <Text className="text-white/70" style={{ fontSize: 14 }}>
-                            That's you
-                          </Text>
-                        ) : targetProfile ? (
-                          <Text className="text-white/80" style={{ fontSize: 14 }}>
-                            Found:{" "}
-                            <Text className="font-semibold">{targetProfile.nickname}</Text>
-                          </Text>
-                        ) : emailLower.length > 0 ? (
-                          <Text className="text-white/60" style={{ fontSize: 14 }}>
-                            Will create new profile
-                          </Text>
-                        ) : null}
-                      </View>
-                    )}
-
-                    <TouchableOpacity
-                      disabled={!canSubmit || busy || alreadyFriend || isSelf}
-                      onPress={handleAddByEmail}
-                      className={`rounded-full py-5 items-center ${
-                        !canSubmit || busy || alreadyFriend || isSelf
-                          ? "bg-white/20"
-                          : "bg-white"
-                      }`}
-                      activeOpacity={0.8}
-                    >
-                      <Text
-                        className="uppercase"
-                        style={{
-                          fontSize: 16,
-                          fontWeight: "800",
-                          letterSpacing: 1,
-                          color:
-                            !canSubmit || busy || alreadyFriend || isSelf
-                              ? "rgba(255,255,255,0.6)"
-                              : "#000000",
-                        }}
-                      >
-                        {busy ? "Adding..." : "Add Friend"}
-                      </Text>
-                    </TouchableOpacity>
                   </View>
-                )}
+                </TouchableOpacity>
               </View>
 
               {/* Friend Requests */}
@@ -342,7 +305,11 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                 <View className="mb-10">
                   <Text
                     className="text-white/60 uppercase mb-4"
-                    style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "600",
+                      letterSpacing: 1.5,
+                    }}
                   >
                     Requests ({incomingRequests.length})
                   </Text>
@@ -382,7 +349,11 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                         >
                           <Text
                             className="text-black uppercase"
-                            style={{ fontSize: 14, fontWeight: "800", letterSpacing: 1 }}
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "800",
+                              letterSpacing: 1,
+                            }}
                           >
                             Accept
                           </Text>
@@ -395,7 +366,11 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                         >
                           <Text
                             className="text-white uppercase"
-                            style={{ fontSize: 14, fontWeight: "800", letterSpacing: 1 }}
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "800",
+                              letterSpacing: 1,
+                            }}
                           >
                             Decline
                           </Text>
@@ -498,7 +473,11 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                 >
                   <Text
                     className="text-red-400 uppercase"
-                    style={{ fontSize: 12, fontWeight: "800", letterSpacing: 0.5 }}
+                    style={{
+                      fontSize: 12,
+                      fontWeight: "800",
+                      letterSpacing: 0.5,
+                    }}
                   >
                     Unfriend
                   </Text>
@@ -542,7 +521,11 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
             </View>
             <Text
               className="text-xs text-white uppercase"
-              style={{ marginTop: 2, opacity: activeTab === "home" ? 1 : 0.5, fontWeight: "700" }}
+              style={{
+                marginTop: 2,
+                opacity: activeTab === "home" ? 1 : 0.5,
+                fontWeight: "700",
+              }}
             >
               HOME
             </Text>
