@@ -52,8 +52,8 @@ YOUR TASK - Follow these instructions EXACTLY:
 
 1. 📍 LOCATION DETAILS
    - Start with: "${venue}, ${location}"
-   - Add this exact Google Maps link on the next line and make sure it's clickable: ${googleMapsLink}
    - If you know the specific street address for ${venue} in ${location}, include it
+   - Note: An interactive map is shown below your analysis, so no need to include any Google Maps links
    - Keep it brief - 2-3 lines max
 
 2. 🎯 EVENT OVERVIEW
