@@ -200,10 +200,16 @@ function Login({ isActive, setIsActive }: LoginProps) {
         {/* Footer */}
         <View className="absolute bottom-12">
           <Text
-            className="text-white/30 text-center uppercase"
+            className="text-white/30 text-center uppercase mb-2"
             style={{ fontSize: 10, fontWeight: "600", letterSpacing: 2 }}
           >
             Discover • Connect • Experience
+          </Text>
+          <Text
+            className="text-white/20 text-center uppercase"
+            style={{ fontSize: 9, fontWeight: "700", letterSpacing: 1.5 }}
+          >
+            Powered by Instant & Lime AI
           </Text>
         </View>
       </View>
