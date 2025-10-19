@@ -691,17 +691,28 @@ function SwipeCard({
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
+  const detailsPanelTranslateY = useSharedValue(height);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const [aiAnalysisContent, setAiAnalysisContent] = useState("");
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [mapsEmbedUrl, setMapsEmbedUrl] = useState("");
   const [genre, setGenre] = useState<string>("");
+  const genreOpacity = useSharedValue(0);
 
   // Fade in animation when card appears
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 800 });
   }, [card.id]);
+
+  // Animate details panel when showDetails changes
+  useEffect(() => {
+    if (showDetails) {
+      detailsPanelTranslateY.value = withTiming(0, { duration: 550 });
+    } else {
+      detailsPanelTranslateY.value = withTiming(height, { duration: 300 });
+    }
+  }, [showDetails]);
 
   // Detect genre when card loads
   useEffect(() => {
@@ -721,9 +732,12 @@ function SwipeCard({
         });
         const data = await response.json();
         setGenre(data.genre || "");
+        // Fade in the genre after it's loaded
+        genreOpacity.value = withTiming(1, { duration: 600 });
       } catch (error) {
         console.error("Error detecting genre:", error);
         setGenre("Music"); // Fallback
+        genreOpacity.value = withTiming(1, { duration: 600 });
       }
     };
 
@@ -795,6 +809,18 @@ function SwipeCard({
       [1, 0]
     );
     return { opacity };
+  });
+
+  const genreAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: genreOpacity.value,
+    };
+  });
+
+  const detailsPanelAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: detailsPanelTranslateY.value }],
+    };
   });
 
   const closeDetailPanel = () => {
@@ -941,18 +967,15 @@ Enjoy the event! 🎵`;
 
             {/* Genre Tag */}
             {genre && (
-              <View
-                style={{
-                  position: "absolute",
-                  top: 50,
-                  left: 30,
-                  backgroundColor: "rgba(16, 185, 129, 0.9)",
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderRadius: 20,
-                  borderWidth: 1,
-                  borderColor: "rgba(255, 255, 255, 0.3)",
-                }}
+              <Animated.View
+                style={[
+                  genreAnimatedStyle,
+                  {
+                    position: "absolute",
+                    top: 50,
+                    left: 30,
+                  },
+                ]}
               >
                 <Text
                   style={{
@@ -960,11 +983,14 @@ Enjoy the event! 🎵`;
                     fontSize: 14,
                     fontWeight: "800",
                     letterSpacing: 0.5,
+                    textShadowColor: "rgba(0, 0, 0, 0.9)",
+                    textShadowOffset: { width: 0, height: 1 },
+                    textShadowRadius: 2,
                   }}
                 >
                   #{genre.toUpperCase()}
                 </Text>
-              </View>
+              </Animated.View>
             )}
           </View>
 
@@ -1002,15 +1028,18 @@ Enjoy the event! 🎵`;
         </Animated.View>
       </GestureDetector>
 
-      {showDetails && (
-        <View
-          className="absolute left-0 right-0 bg-black z-[50]"
-          style={{
+      <Animated.View
+        className="absolute left-0 right-0 bg-black z-[50]"
+        style={[
+          detailsPanelAnimatedStyle,
+          {
             top: 0,
             height: height,
-          }}
-        >
-          <View className="flex-1 pt-16 px-8">
+          },
+        ]}
+        pointerEvents={showDetails ? "auto" : "none"}
+      >
+        <View className="flex-1 pt-16 px-8">
             <TouchableOpacity
               onPress={closeDetailPanel}
               className="self-end mb-8"
@@ -1170,8 +1199,7 @@ Enjoy the event! 🎵`;
               </TouchableOpacity>
             </ScrollView>
           </View>
-        </View>
-      )}
+        </Animated.View>
 
       {/* AI Analysis Modal */}
       <Modal
