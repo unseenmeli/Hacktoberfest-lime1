@@ -71,9 +71,29 @@ function transformEvent(event: any, index: number) {
 }
 
 export default function Home() {
+  const [activeTab, setActiveTab] = useState("home");
+
+  // Early return BEFORE any other hooks are called
+  if (activeTab === "friends") {
+    return <Friends activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
+  if (activeTab === "settings") {
+    return <Settings activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
+  return <HomeContent activeTab={activeTab} setActiveTab={setActiveTab} />;
+}
+
+function HomeContent({
+  activeTab,
+  setActiveTab,
+}: {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}) {
   useEnsureProfile();
 
-  const [activeTab, setActiveTab] = useState("home");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const nameOpacity = useSharedValue(0);
@@ -82,13 +102,11 @@ export default function Home() {
   const { user } = db.useAuth();
 
   // Get current user's profile
-  const myQuery = user
-    ? {
-        profiles: {
-          $: { where: { "$user.id": user.id }, limit: 1 },
-        },
-      }
-    : null;
+  const myQuery = {
+    profiles: {
+      $: { where: user ? { "$user.id": user.id } : { id: "never-match" }, limit: 1 },
+    },
+  };
 
   const { data: profileData } = db.useQuery(myQuery);
   const myProfile = profileData?.profiles?.[0];
@@ -188,14 +206,6 @@ export default function Home() {
       opacity: nameOpacity.value * swipeOpacity,
     };
   });
-
-  if (activeTab === "friends") {
-    return <Friends activeTab={activeTab} setActiveTab={setActiveTab} />;
-  }
-
-  if (activeTab === "settings") {
-    return <Settings activeTab={activeTab} setActiveTab={setActiveTab} />;
-  }
 
   // Show loading state with timeout - don't block indefinitely
   const [showLoadingTimeout, setShowLoadingTimeout] = useState(false);

@@ -6,19 +6,28 @@ export default function useEnsureProfile() {
   const { user } = db.useAuth();
   const creatingRef = useRef(false);
 
-  const myQuery = user
-    ? { profiles: { $: { where: { "$user.id": user.id }, limit: 1 } } }
-    : null;
+  const myQuery = {
+    profiles: {
+      $: {
+        where: user ? { "$user.id": user.id } : { id: "never-match" },
+        limit: 1
+      }
+    }
+  };
   const { data: meData, isLoading } = db.useQuery(myQuery);
   const me = meData?.profiles?.[0];
 
   const emailLower = (user?.email || "").toLowerCase();
 
   // Look up any profile that already has this emailLower (could be a stub)
-  const byEmailQuery =
-    user && emailLower
-      ? { profiles: { $: { where: { emailLower }, limit: 1 } } }
-      : null;
+  const byEmailQuery = {
+    profiles: {
+      $: {
+        where: (user && emailLower) ? { emailLower } : { id: "never-match" },
+        limit: 1
+      }
+    }
+  };
   const { data: byEmailData } = db.useQuery(byEmailQuery);
   const profileByEmail = byEmailData?.profiles?.[0];
 

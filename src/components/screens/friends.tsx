@@ -27,15 +27,13 @@ export default function Friends({
   const { user } = db.useAuth();
 
   // Load my profile + both directions (for requests & friends)
-  const myQuery = user
-    ? {
-        profiles: {
-          $: { where: { "$user.id": user.id }, limit: 1 },
-          friends: { $: { order: { createdAt: "desc" } } }, // outgoing (me → them)
-          friendsOf: { $: { order: { createdAt: "desc" } } }, // incoming (them → me)
-        },
-      }
-    : null;
+  const myQuery = {
+    profiles: {
+      $: { where: user ? { "$user.id": user.id } : {}, limit: 1 },
+      friends: { $: { order: { createdAt: "desc" } } }, // outgoing (me → them)
+      friendsOf: { $: { order: { createdAt: "desc" } } }, // incoming (them → me)
+    },
+  };
 
   const {
     data: meData,
@@ -69,21 +67,26 @@ export default function Friends({
   const [friendSearch, setFriendSearch] = useState(false);
 
   // Prefer an OWNED profile with this email (joined via $user.email)
-  const byUserQuery = emailLower
-    ? {
-        profiles: {
-          $: { where: { "$user.email": { $ilike: emailLower } }, limit: 1 },
-        },
-      }
-    : null;
+  const byUserQuery = {
+    profiles: {
+      $: {
+        where: emailLower ? { "$user.email": { $ilike: emailLower } } : { id: "never-match" },
+        limit: 1
+      },
+    },
+  };
   const { data: byUserData } = db.useQuery(byUserQuery);
   const profileByUser = byUserData?.profiles?.[0];
 
   // Fallback: a stub (unowned) or any profile with matching emailLower
-  const byEmailQuery =
-    !profileByUser && emailLower
-      ? { profiles: { $: { where: { emailLower }, limit: 1 } } }
-      : null;
+  const byEmailQuery = {
+    profiles: {
+      $: {
+        where: (!profileByUser && emailLower) ? { emailLower } : { id: "never-match" },
+        limit: 1
+      }
+    }
+  };
   const { data: byEmailData } = db.useQuery(byEmailQuery);
   const profileByEmail = byEmailData?.profiles?.[0];
 
