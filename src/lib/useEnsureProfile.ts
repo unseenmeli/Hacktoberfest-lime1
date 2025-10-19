@@ -65,10 +65,7 @@ export default function useEnsureProfile() {
         }
 
         // Create fresh owned profile
-        const nickname =
-          (user.email?.split("@")[0] || "user") +
-          "-" +
-          Math.floor(Math.random() * 10000);
+        const nickname = user.email?.toLowerCase() || "user-" + Math.floor(Math.random() * 10000);
         const profileId = id();
         await db.transact(
           db.tx.profiles[profileId]
