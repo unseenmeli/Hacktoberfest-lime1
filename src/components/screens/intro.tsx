@@ -24,25 +24,25 @@ const INTRO_SLIDES = [
     id: 1,
     title: "DISCOVER EVENTS",
     description: "Swipe through curated events tailored to your music taste and preferences",
-    icon: "🎵",
+    icon: require("../../media/musical-note.png"),
   },
   {
     id: 2,
     title: "SWIPE TO MATCH",
     description: "Swipe right to save events you love, left to pass. Swipe up for details",
-    icon: "👆",
+    icon: require("../../media/palm-of-hand.png"),
   },
   {
     id: 3,
     title: "CONNECT WITH FRIENDS",
     description: "See who's attending, make new connections, and share your experiences",
-    icon: "👥",
+    icon: require("../../media/friends (1).png"),
   },
   {
     id: 4,
     title: "AI ANALYSIS",
     description: "Get personalized insights about events, artists, and your music preferences",
-    icon: "🤖",
+    icon: require("../../media/artificial-intelligence.png"),
   },
 ];
 
@@ -81,9 +81,15 @@ export default function Intro({ onComplete }: IntroProps) {
       <View className="flex-1 justify-center items-center px-8">
         {/* Icon */}
         <View className="mb-12">
-          <Text style={{ fontSize: 120, textAlign: "center" }}>
-            {slide.icon}
-          </Text>
+          <Image
+            source={slide.icon}
+            style={{
+              width: 120,
+              height: 120,
+              tintColor: "#ffffff",
+              resizeMode: "contain",
+            }}
+          />
         </View>
 
         {/* Title */}

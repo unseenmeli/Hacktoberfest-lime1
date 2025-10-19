@@ -121,7 +121,7 @@ function HomeContent({
 
   const { user } = db.useAuth();
 
-  // Get current user's profile
+  // Get current user's profile with friends
   const myQuery = {
     profiles: {
       $: {
@@ -133,9 +133,16 @@ function HomeContent({
 
   const { data: profileData } = db.useQuery(myQuery);
   const myProfile = profileData?.profiles?.[0];
+  const myFriends = myProfile?.friends || [];
 
-  // Fetch events from InstantDB
-  const { isLoading, error, data } = db.useQuery({ events: {} });
+  // Fetch events from InstantDB with likes (including profile info)
+  const { isLoading, error, data } = db.useQuery({
+    events: {
+      likes: {
+        profile: {},
+      },
+    },
+  });
 
   // Debug logging
   useEffect(() => {
@@ -216,6 +223,28 @@ function HomeContent({
   };
 
   const currentCard = CARDS_DATA[currentIndex];
+
+  // Get friends who liked the current event
+  const getFriendsWhoLiked = () => {
+    if (!currentCard || !data?.events) return [];
+
+    // Find the actual event from the database
+    const dbEvent = data.events.find((e: any) => e.eventId === currentCard.id);
+    if (!dbEvent || !dbEvent.likes) return [];
+
+    // Get IDs of my friends
+    const myFriendIds = new Set(myFriends.map((f: any) => f.id));
+
+    // Filter likes to only include friends
+    const friendLikes = dbEvent.likes.filter((like: any) =>
+      like.profile && myFriendIds.has(like.profile.id)
+    );
+
+    // Return friend profiles
+    return friendLikes.map((like: any) => like.profile);
+  };
+
+  const friendsWhoLiked = getFriendsWhoLiked();
 
   // Fade in the name and date when a new card appears
   useEffect(() => {
@@ -323,11 +352,67 @@ function HomeContent({
 
           <Animated.View
             className="absolute left-0 right-0 px-8 z-[2]"
+<<<<<<< HEAD
             style={[
               nameAnimatedStyle,
               { bottom: 140, height: 135, justifyContent: "flex-end" },
             ]}
+=======
+            style={[nameAnimatedStyle, { bottom: 140, height: 135, justifyContent: "flex-end" }]}
+            pointerEvents="none"
+>>>>>>> a96d7ad (Make magic happen swipe)
           >
+            {/* Friend Bubbles - Instagram Reels style */}
+            {friendsWhoLiked.length > 0 && (
+              <View className="flex-row items-center mb-3" style={{ marginLeft: 2 }}>
+                {/* Show up to 3 friend bubbles */}
+                {friendsWhoLiked.slice(0, 3).map((friend: any, index: number) => (
+                  <View
+                    key={friend.id}
+                    className="rounded-full border-2 border-white bg-white/20"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: -8,
+                      zIndex: 3 - index,
+                    }}
+                  >
+                    <Text className="text-white" style={{ fontSize: 14, fontWeight: "700" }}>
+                      {friend.nickname ? friend.nickname.charAt(0).toUpperCase() : "?"}
+                    </Text>
+                  </View>
+                ))}
+
+                {/* Plus sign if more than 3 friends liked */}
+                {friendsWhoLiked.length > 3 && (
+                  <View
+                    className="rounded-full border-2 border-white bg-white/20"
+                    style={{
+                      width: 32,
+                      height: 32,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: -8,
+                      marginLeft: 0,
+                      zIndex: 0,
+                    }}
+                  >
+                    <Text
+                      className="text-white"
+                      style={{
+                        fontSize: 16,
+                        fontWeight: "700",
+                      }}
+                    >
+                      +{friendsWhoLiked.length - 3}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+
             <Text
               className="text-white uppercase"
               numberOfLines={2}
@@ -344,24 +429,47 @@ function HomeContent({
             >
               {currentCard.name}
             </Text>
-            <View
-              className="rounded-full self-start border border-white/20"
-              style={{
-                backgroundColor: "rgba(255,255,255,0.15)",
-                paddingHorizontal: 20,
-                paddingVertical: 10,
-              }}
-            >
-              <Text
-                className="text-white"
+            <View className="flex-row items-center justify-between mb-2">
+              <View
+                className="rounded-full border border-white/20"
                 style={{
-                  fontSize: 15,
-                  fontWeight: "600",
-                  letterSpacing: 1.2,
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                  paddingHorizontal: 20,
+                  paddingVertical: 10,
                 }}
               >
-                {currentCard.date}
-              </Text>
+                <Text
+                  className="text-white"
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "600",
+                    letterSpacing: 1.2,
+                  }}
+                >
+                  {currentCard.date}
+                </Text>
+              </View>
+              <View className="flex-row items-center" style={{ gap: 6, opacity: 0.7 }}>
+                <Text
+                  className="text-white"
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "600",
+                  }}
+                >
+                  📍
+                </Text>
+                <Text
+                  className="text-white"
+                  style={{
+                    fontSize: 15,
+                    fontWeight: "600",
+                    letterSpacing: 1.2,
+                  }}
+                >
+                  {currentCard.venue}
+                </Text>
+              </View>
             </View>
           </Animated.View>
         </>
@@ -496,6 +604,70 @@ interface SwipeCardProps {
   showDetails: boolean;
   setShowDetails: (value: boolean) => void;
   cardTranslateX: Animated.SharedValue<number>;
+}
+
+function LineupItem({ artist }: { artist: string }) {
+  const opacity = useSharedValue(0);
+
+  const gradientStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  const handlePressIn = () => {
+    opacity.value = withTiming(1, { duration: 200 });
+  };
+
+  const handlePressOut = () => {
+    opacity.value = withTiming(0, { duration: 300 });
+  };
+
+  return (
+    <TouchableOpacity
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      activeOpacity={1}
+    >
+      <View
+        className="rounded-2xl p-4 border border-white/10 overflow-hidden"
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        }}
+      >
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            },
+            gradientStyle,
+          ]}
+        >
+          <LinearGradient
+            colors={[
+              'rgba(255, 255, 255, 0.15)',
+              'rgba(255, 255, 255, 0.08)',
+              'rgba(255, 255, 255, 0.02)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </Animated.View>
+        <Text
+          className="text-white"
+          style={{ fontSize: 16, fontWeight: "600", zIndex: 1 }}
+        >
+          {artist}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
 }
 
 function SwipeCard({
@@ -963,19 +1135,9 @@ Enjoy the event! 🎵`;
                 >
                   Lineup
                 </Text>
-                <View className="space-y-3">
+                <View style={{ gap: 12 }}>
                   {card.lineup.map((artist, idx) => (
-                    <View
-                      key={idx}
-                      className="bg-white/5 rounded-2xl p-4 border border-white/10"
-                    >
-                      <Text
-                        className="text-white"
-                        style={{ fontSize: 16, fontWeight: "600" }}
-                      >
-                        {artist}
-                      </Text>
-                    </View>
+                    <LineupItem key={idx} artist={artist} />
                   ))}
                 </View>
               </View>

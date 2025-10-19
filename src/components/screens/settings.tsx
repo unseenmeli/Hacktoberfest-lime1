@@ -1,35 +1,100 @@
 import { View, Text, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
+import { useState } from "react";
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import db from "../../app/db";
 import useEnsureProfile from "../../lib/useEnsureProfile";
+import LikedEvents from "./likedEvents";
 
 interface SettingsProps {
   activeTab?: string;
   setActiveTab?: (tab: string) => void;
 }
 
+function PressableButton({ onPress, children }: { onPress: () => void; children: React.ReactNode }) {
+  const opacity = useSharedValue(0);
+
+  const gradientStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
+
+  const handlePressIn = () => {
+    opacity.value = withTiming(1, { duration: 200 });
+  };
+
+  const handlePressOut = () => {
+    opacity.value = withTiming(0, { duration: 300 });
+  };
+
+  return (
+    <TouchableOpacity
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+      onPress={onPress}
+      activeOpacity={1}
+    >
+      <View
+        className="rounded-2xl py-5 px-6 mb-3 border border-white/10 flex-row items-center justify-between overflow-hidden"
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        }}
+      >
+        <Animated.View
+          style={[
+            {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            },
+            gradientStyle,
+          ]}
+        >
+          <LinearGradient
+            colors={[
+              'rgba(255, 255, 255, 0.15)',
+              'rgba(255, 255, 255, 0.08)',
+              'rgba(255, 255, 255, 0.02)',
+            ]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              width: '100%',
+              height: '100%',
+            }}
+          />
+        </Animated.View>
+        <View className="flex-row items-center justify-between flex-1" style={{ zIndex: 1 }}>
+          {children}
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
 export default function Settings({ activeTab = "settings", setActiveTab }: SettingsProps) {
   useEnsureProfile();
 
   const { user } = db.useAuth();
+  const [showLikedEvents, setShowLikedEvents] = useState(false);
+  const [showSignOutAlert, setShowSignOutAlert] = useState(false);
+
+  if (showLikedEvents) {
+    return <LikedEvents onBack={() => setShowLikedEvents(false)} />;
+  }
 
   const handleSignOut = async () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            await db.auth.signOut();
-          },
-        },
-      ]
-    );
+    setShowSignOutAlert(true);
+  };
+
+  const confirmSignOut = async () => {
+    setShowSignOutAlert(false);
+    await db.auth.signOut();
+  };
+
+  const cancelSignOut = () => {
+    setShowSignOutAlert(false);
   };
 
   const getInitial = () => {
@@ -41,6 +106,83 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
 
   return (
     <View className="flex-1 bg-black">
+      {/* Sign Out Confirmation Alert */}
+      {showSignOutAlert && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 1)",
+            zIndex: 1000,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View style={{ width: "85%" }}>
+            <View className="bg-black rounded-2xl p-6 border border-white/20">
+              <Text
+                className="text-white uppercase text-center mb-3"
+                style={{
+                  fontSize: 24,
+                  fontWeight: "900",
+                  letterSpacing: -0.5,
+                }}
+              >
+                Sign Out
+              </Text>
+              <Text
+                className="text-white/70 text-center mb-6"
+                style={{
+                  fontSize: 15,
+                  fontWeight: "600",
+                }}
+              >
+                Are you sure you want to sign out?
+              </Text>
+
+              <View className="gap-3">
+                <TouchableOpacity
+                  onPress={confirmSignOut}
+                  className="bg-red-500 rounded-full py-4 items-center"
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    className="text-white uppercase"
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "800",
+                      letterSpacing: 1,
+                    }}
+                  >
+                    Sign Out
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={cancelSignOut}
+                  className="bg-white/10 rounded-full py-4 items-center border border-white/20"
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    className="text-white uppercase"
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "800",
+                      letterSpacing: 1,
+                    }}
+                  >
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
       <ScrollView
         className="flex-1 px-8 pt-16"
         style={{ paddingBottom: 140 }}
@@ -114,25 +256,19 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
             Account
           </Text>
 
-          {/* Edit Profile Button */}
-          <TouchableOpacity
-            className="bg-white/5 rounded-2xl py-5 px-6 mb-3 border border-white/10 flex-row items-center justify-between"
-            activeOpacity={0.8}
-          >
+          {/* Liked Events Button */}
+          <PressableButton onPress={() => setShowLikedEvents(true)}>
             <Text
               className="text-white uppercase"
               style={{ fontSize: 16, fontWeight: "700", letterSpacing: 0.5 }}
             >
-              Edit Profile
+              Liked Events
             </Text>
             <Text className="text-white/50" style={{ fontSize: 18 }}>›</Text>
-          </TouchableOpacity>
+          </PressableButton>
 
           {/* Notifications Button */}
-          <TouchableOpacity
-            className="bg-white/5 rounded-2xl py-5 px-6 mb-3 border border-white/10 flex-row items-center justify-between"
-            activeOpacity={0.8}
-          >
+          <PressableButton onPress={() => {}}>
             <Text
               className="text-white uppercase"
               style={{ fontSize: 16, fontWeight: "700", letterSpacing: 0.5 }}
@@ -140,13 +276,10 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
               Notifications
             </Text>
             <Text className="text-white/50" style={{ fontSize: 18 }}>›</Text>
-          </TouchableOpacity>
+          </PressableButton>
 
           {/* Privacy Button */}
-          <TouchableOpacity
-            className="bg-white/5 rounded-2xl py-5 px-6 mb-3 border border-white/10 flex-row items-center justify-between"
-            activeOpacity={0.8}
-          >
+          <PressableButton onPress={() => {}}>
             <Text
               className="text-white uppercase"
               style={{ fontSize: 16, fontWeight: "700", letterSpacing: 0.5 }}
@@ -154,13 +287,13 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
               Privacy
             </Text>
             <Text className="text-white/50" style={{ fontSize: 18 }}>›</Text>
-          </TouchableOpacity>
+          </PressableButton>
         </View>
 
         {/* Sign Out Button */}
         <TouchableOpacity
           onPress={handleSignOut}
-          className="bg-red-500/10 rounded-full py-5 items-center border border-red-500/30 mt-4"
+          className="bg-red-500/10 rounded-full py-5 items-center border border-red-500/30 mt-2"
           activeOpacity={0.8}
         >
           <Text
@@ -172,7 +305,7 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
         </TouchableOpacity>
 
         {/* Credits */}
-        <View className="items-center pb-32 mt-8">
+        <View className="items-center mt-4" style={{ paddingBottom: 160 }}>
           <Text className="text-white/30 lowercase" style={{ fontSize: 16, fontWeight: "600" }}>
             made by lieh & unseenmeli
           </Text>

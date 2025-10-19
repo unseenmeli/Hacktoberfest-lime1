@@ -10,6 +10,7 @@ const _schema = i.schema({
       // ↓ we'll use this to upsert/find a person by email without reading $users
       emailLower: i.string().unique().indexed(),
       createdAt: i.date().indexed(),
+      genres: i.json().optional(),
     }),
     events: i.entity({
       eventId: i.string().unique().indexed(),

@@ -1,16 +1,16 @@
 {
   "expo": {
-    "name": "OneShot",
-    "slug": "OneShotApp",
+    "name": "Swipe",
+    "slug": "SwipeApp",
     "version": "1.0.0",
-    "scheme": "oneshot",
+    "scheme": "swipe",
     "userInterfaceStyle": "automatic",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#000000"
     },
     "web": {
       "output": "static"
@@ -24,17 +24,17 @@
       ]
     ],
     "ios": {
-      "bundleIdentifier": "fly.dev.oneshot.unseenmeli",
+      "bundleIdentifier": "fly.dev.swipe.unseenmeli",
       "buildNumber": "2",
       "supportsTablet": false,
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "OneShot needs access to your photo library to let you choose logos for your apps.",
-        "NSCameraUsageDescription": "OneShot needs access to your camera to take photos for app logos.",
+        "NSPhotoLibraryUsageDescription": "Swipe needs access to your photo library.",
+        "NSCameraUsageDescription": "Swipe needs access to your camera.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "fly.dev.oneshot.unseenmeli",
+      "package": "fly.dev.swipe.unseenmeli",
       "versionCode": 1,
       "permissions": [
         "READ_EXTERNAL_STORAGE",
