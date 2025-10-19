@@ -18,6 +18,7 @@ import db from "../../app/db";
 import { useState, useEffect } from "react";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import useEnsureProfile from "../../lib/useEnsureProfile";
+import { useEvents } from "../../lib/EventsContext";
 import { id } from "@instantdb/react-native";
 import Animated, {
   useAnimatedStyle,
@@ -114,7 +115,9 @@ function HomeContent({
 }) {
   useEnsureProfile();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // Use events context for persistent state across navigation
+  const { events, currentIndex, setCurrentIndex, isLoading, error } = useEvents();
+
   const [showDetails, setShowDetails] = useState(false);
   const nameOpacity = useSharedValue(0);
   const cardTranslateX = useSharedValue(0);
@@ -135,33 +138,20 @@ function HomeContent({
   const myProfile = profileData?.profiles?.[0];
   const myFriends = myProfile?.friends || [];
 
-  // Fetch events from InstantDB with likes (including profile info)
-  const { isLoading, error, data } = db.useQuery({
-    events: {
-      likes: {
-        profile: {},
-      },
-    },
-  });
-
   // Debug logging
   useEffect(() => {
     console.log("Events query state:", {
       isLoading,
       hasError: !!error,
       error: error?.message || error,
-      hasData: !!data,
-      eventCount: data?.events?.length,
-      dataKeys: data ? Object.keys(data) : [],
+      hasData: !!events,
+      eventCount: events?.length,
     });
-    if (data && !data.events) {
-      console.log("Data exists but no events property:", data);
-    }
-  }, [isLoading, error, data]);
+  }, [isLoading, error, events]);
 
   // Transform the events data to match the card structure
-  const CARDS_DATA = data?.events
-    ? data.events.map((event: any, index: number) =>
+  const CARDS_DATA = events
+    ? events.map((event: any, index: number) =>
         transformEvent(event, index)
       )
     : [];
@@ -179,7 +169,7 @@ function HomeContent({
     if (myProfile && currentCard) {
       try {
         // Find the event in the database by eventId
-        const eventToLike = data?.events.find(
+        const eventToLike = events.find(
           (e: any) => e.eventId === currentCard.id
         );
 
@@ -226,10 +216,10 @@ function HomeContent({
 
   // Get friends who liked the current event
   const getFriendsWhoLiked = () => {
-    if (!currentCard || !data?.events) return [];
+    if (!currentCard || !events) return [];
 
     // Find the actual event from the database
-    const dbEvent = data.events.find((e: any) => e.eventId === currentCard.id);
+    const dbEvent = events.find((e: any) => e.eventId === currentCard.id);
     if (!dbEvent || !dbEvent.likes) return [];
 
     // Get IDs of my friends
@@ -269,16 +259,16 @@ function HomeContent({
   const [showLoadingTimeout, setShowLoadingTimeout] = useState(false);
 
   useEffect(() => {
-    if (isLoading && !data) {
+    if (isLoading && events.length === 0) {
       const timer = setTimeout(() => {
         setShowLoadingTimeout(true);
       }, 5000); // After 5 seconds, show alternative message
 
       return () => clearTimeout(timer);
     }
-  }, [isLoading, data]);
+  }, [isLoading, events]);
 
-  if (isLoading && !data && !showLoadingTimeout) {
+  if (isLoading && events.length === 0 && !showLoadingTimeout) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
         <Text className="text-white text-xl">Loading events...</Text>
@@ -286,7 +276,7 @@ function HomeContent({
     );
   }
 
-  if (isLoading && !data && showLoadingTimeout) {
+  if (isLoading && events.length === 0 && showLoadingTimeout) {
     return (
       <View className="flex-1 items-center justify-center bg-black px-8">
         <Text className="text-white text-xl font-bold mb-4">
