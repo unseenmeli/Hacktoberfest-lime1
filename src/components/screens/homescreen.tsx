@@ -96,6 +96,21 @@ export default function Home() {
   // Fetch events from InstantDB
   const { isLoading, error, data } = db.useQuery({ events: {} });
 
+  // Debug logging
+  useEffect(() => {
+    console.log('Events query state:', {
+      isLoading,
+      hasError: !!error,
+      error: error?.message || error,
+      hasData: !!data,
+      eventCount: data?.events?.length,
+      dataKeys: data ? Object.keys(data) : []
+    });
+    if (data && !data.events) {
+      console.log('Data exists but no events property:', data);
+    }
+  }, [isLoading, error, data]);
+
   // Transform the events data to match the card structure
   const CARDS_DATA = data?.events
     ? data.events.map((event: any, index: number) => transformEvent(event, index))
@@ -182,11 +197,37 @@ export default function Home() {
     return <Settings activeTab={activeTab} setActiveTab={setActiveTab} />;
   }
 
-  // Show loading state
-  if (isLoading) {
+  // Show loading state with timeout - don't block indefinitely
+  const [showLoadingTimeout, setShowLoadingTimeout] = useState(false);
+
+  useEffect(() => {
+    if (isLoading && !data) {
+      const timer = setTimeout(() => {
+        setShowLoadingTimeout(true);
+      }, 5000); // After 5 seconds, show alternative message
+
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, data]);
+
+  if (isLoading && !data && !showLoadingTimeout) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
         <Text className="text-white text-xl">Loading events...</Text>
+      </View>
+    );
+  }
+
+  if (isLoading && !data && showLoadingTimeout) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black px-8">
+        <Text className="text-white text-xl font-bold mb-4">Taking longer than expected...</Text>
+        <Text className="text-white/60 text-center mb-6">
+          This might be a network issue or the events may not be loaded in the database yet.
+        </Text>
+        <Text className="text-white/40 text-sm text-center">
+          Check your console logs for details.
+        </Text>
       </View>
     );
   }
@@ -199,6 +240,11 @@ export default function Home() {
         <Text className="text-white/60 mt-2">{error.message}</Text>
       </View>
     );
+  }
+
+  // If no events in database, show empty state (don't block on loading)
+  if (CARDS_DATA.length === 0) {
+    console.log("No events found in database");
   }
 
   return (
@@ -232,7 +278,7 @@ export default function Home() {
           />
 
           <Animated.View
-            className="absolute left-0 right-0 px-8 bg-black z-[2]"
+            className="absolute left-0 right-0 px-8 z-[2]"
             style={[nameAnimatedStyle, { bottom: 140, height: 135, justifyContent: "flex-end" }]}
           >
             <Text

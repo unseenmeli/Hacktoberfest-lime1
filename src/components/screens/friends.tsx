@@ -284,8 +284,13 @@ export default function Friends({
                     >
                       friend@example.com
                     </Text>
-                  </TouchableOpacity>
-                ) : (
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              {/* LEGACY - Expandable Add Friend (if needed) */}
+              {isSearchFocused && (
+                <View className="mb-10">
                   <View className="bg-black/90 rounded-2xl p-6 border border-white/20">
                     <View className="flex-row items-center justify-between mb-4">
                       <Text
@@ -372,8 +377,8 @@ export default function Friends({
                       </Text>
                     </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
-              </View>
+                </View>
+              )}
 
               {/* Friend Requests */}
               {incomingRequests.length > 0 && (
