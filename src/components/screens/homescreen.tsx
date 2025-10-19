@@ -128,6 +128,7 @@ function HomeContent({
         where: user ? { "$user.id": user.id } : { id: "never-match" },
         limit: 1,
       },
+      friends: {},
     },
   };
 
