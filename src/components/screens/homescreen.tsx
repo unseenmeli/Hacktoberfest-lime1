@@ -76,6 +76,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("home");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
+  const nameOpacity = useSharedValue(0);
+  const cardTranslateX = useSharedValue(0);
 
   const { user } = db.useAuth();
 
@@ -153,6 +155,25 @@ export default function Home() {
 
   const currentCard = CARDS_DATA[currentIndex];
 
+  // Fade in the name and date when a new card appears
+  useEffect(() => {
+    nameOpacity.value = withTiming(1, { duration: 800 });
+    cardTranslateX.value = 0;
+  }, [currentIndex]);
+
+  const nameAnimatedStyle = useAnimatedStyle(() => {
+    // Fade out name as card is being swiped
+    const swipeOpacity = interpolate(
+      Math.abs(cardTranslateX.value),
+      [0, SWIPE_THRESHOLD],
+      [1, 0]
+    );
+
+    return {
+      opacity: nameOpacity.value * swipeOpacity,
+    };
+  });
+
   if (activeTab === "friends") {
     return <Friends activeTab={activeTab} setActiveTab={setActiveTab} />;
   }
@@ -207,11 +228,12 @@ export default function Home() {
             onSwipeUp={handleSwipeUp}
             showDetails={showDetails}
             setShowDetails={setShowDetails}
+            cardTranslateX={cardTranslateX}
           />
 
-          <View
+          <Animated.View
             className="absolute left-0 right-0 px-8 bg-black z-[2]"
-            style={{ bottom: 140, height: 135, justifyContent: "flex-end" }}
+            style={[nameAnimatedStyle, { bottom: 140, height: 135, justifyContent: "flex-end" }]}
           >
             <Text
               className="text-white uppercase"
@@ -248,7 +270,7 @@ export default function Home() {
                 {currentCard.date}
               </Text>
             </View>
-          </View>
+          </Animated.View>
         </>
       )}
 
@@ -376,6 +398,7 @@ interface SwipeCardProps {
   onSwipeUp: () => void;
   showDetails: boolean;
   setShowDetails: (value: boolean) => void;
+  cardTranslateX: Animated.SharedValue<number>;
 }
 
 function SwipeCard({
@@ -385,21 +408,30 @@ function SwipeCard({
   onSwipeUp,
   showDetails,
   setShowDetails,
+  cardTranslateX,
 }: SwipeCardProps) {
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
-  const opacity = useSharedValue(1);
+  const opacity = useSharedValue(0);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+
+  // Fade in animation when card appears
+  useEffect(() => {
+    opacity.value = withTiming(1, { duration: 800 });
+  }, [card.id]);
 
   const panGesture = Gesture.Pan()
     .onUpdate((event) => {
       translateX.value = event.translationX;
       translateY.value = event.translationY;
+      cardTranslateX.value = event.translationX;
     })
     .onEnd(() => {
       if (translateY.value < -100) {
         runOnJS(onSwipeUp)();
         translateX.value = withSpring(0);
         translateY.value = withSpring(0);
+        cardTranslateX.value = withSpring(0);
         return;
       }
 
@@ -421,6 +453,7 @@ function SwipeCard({
 
       translateX.value = withSpring(0);
       translateY.value = withSpring(0);
+      cardTranslateX.value = withSpring(0);
     });
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -595,9 +628,24 @@ function SwipeCard({
                 <Text
                   className="text-white/80 leading-6"
                   style={{ fontSize: 16 }}
+                  numberOfLines={isDescriptionExpanded ? undefined : 3}
                 >
                   {card.description}
                 </Text>
+                {card.description.length > 150 && (
+                  <TouchableOpacity
+                    onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    className="mt-2"
+                    activeOpacity={0.7}
+                  >
+                    <Text
+                      className="text-white/60 uppercase"
+                      style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1 }}
+                    >
+                      {isDescriptionExpanded ? "See Less" : "See More"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
 
               <View className="mb-8">
@@ -623,6 +671,18 @@ function SwipeCard({
                   ))}
                 </View>
               </View>
+
+              <TouchableOpacity
+                className="bg-green-500/10 rounded-full py-5 items-center mt-4 border border-green-500/30"
+                activeOpacity={0.8}
+              >
+                <Text
+                  className="text-green-500 uppercase"
+                  style={{ fontSize: 16, fontWeight: "800", letterSpacing: 1 }}
+                >
+                  AI Analysis
+                </Text>
+              </TouchableOpacity>
 
               <TouchableOpacity
                 className="bg-white rounded-full py-5 items-center mt-4"

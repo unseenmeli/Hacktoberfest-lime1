@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Image, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Image, Alert, ScrollView } from "react-native";
 import db from "../../app/db";
 import useEnsureProfile from "../../lib/useEnsureProfile";
 
@@ -41,7 +41,11 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
 
   return (
     <View className="flex-1 bg-black">
-      <View className="flex-1 px-8 pt-16" style={{ paddingBottom: 140 }}>
+      <ScrollView
+        className="flex-1 px-8 pt-16"
+        style={{ paddingBottom: 140 }}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header */}
         <Text
           className="text-white uppercase mb-12"
@@ -168,7 +172,7 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
         </TouchableOpacity>
 
         {/* Credits */}
-        <View className="mt-auto items-center pb-1" style={{ marginTop: 16 }}>
+        <View className="items-center pb-32 mt-8">
           <Text className="text-white/30 lowercase" style={{ fontSize: 16, fontWeight: "600" }}>
             made by lieh & unseenmeli
           </Text>
@@ -176,7 +180,7 @@ export default function Settings({ activeTab = "settings", setActiveTab }: Setti
             team lime
           </Text>
         </View>
-      </View>
+      </ScrollView>
 
       {/* Footer Navigation */}
       <View
