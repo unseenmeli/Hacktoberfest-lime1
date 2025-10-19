@@ -593,11 +593,29 @@ function SwipeCard({
       const data = await response.json();
       setAiAnalysisContent(data.analysis);
 
-      // Create Google Maps embed URL
+      // Create Google Maps iframe HTML
       if (data.venue && data.location) {
         const query = encodeURIComponent(`${data.venue}, ${data.location}`);
-        const embedUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${query}&zoom=15`;
-        setMapsEmbedUrl(embedUrl);
+        const iframeHtml = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body, html { margin: 0; padding: 0; height: 100%; }
+                iframe { border: 0; width: 100%; height: 100%; }
+              </style>
+            </head>
+            <body>
+              <iframe
+                src="https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${query}&zoom=15"
+                allowfullscreen
+                loading="lazy">
+              </iframe>
+            </body>
+          </html>
+        `;
+        setMapsEmbedUrl(iframeHtml);
       }
     } catch (error) {
       console.error('Error generating AI analysis:', error);
@@ -917,10 +935,12 @@ Enjoy the event! 🎵`;
                   {mapsEmbedUrl && (
                     <View className="rounded-2xl overflow-hidden border border-white/20" style={{ height: 300 }}>
                       <WebView
-                        source={{ uri: mapsEmbedUrl }}
+                        source={{ html: mapsEmbedUrl }}
                         style={{ flex: 1 }}
-                        scrollEnabled={false}
+                        scrollEnabled={true}
                         bounces={false}
+                        javaScriptEnabled={true}
+                        domStorageEnabled={true}
                       />
                     </View>
                   )}
