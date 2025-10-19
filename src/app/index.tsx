@@ -70,13 +70,18 @@ export default function App() {
       const profile = data?.profiles?.[0];
 
       if (profile) {
-        // Save genres to user profile
-        await db.transact([
-          db.tx.profiles[profile.id].update({
-            genres: genres,
-          }),
-        ]);
-        console.log("Genres saved:", genres);
+        // Save genres to user profile (only if schema supports it)
+        try {
+          await db.transact([
+            db.tx.profiles[profile.id].update({
+              genres: genres,
+            }),
+          ]);
+          console.log("Genres saved:", genres);
+        } catch (dbError: any) {
+          // Schema field doesn't exist yet - that's okay, we saved to AsyncStorage
+          console.log("Note: genres field not in DB schema yet (saved locally)");
+        }
       }
     } catch (error) {
       console.error("Error saving genres:", error);

@@ -236,8 +236,8 @@ function HomeContent({
     const myFriendIds = new Set(myFriends.map((f: any) => f.id));
 
     // Filter likes to only include friends
-    const friendLikes = dbEvent.likes.filter((like: any) =>
-      like.profile && myFriendIds.has(like.profile.id)
+    const friendLikes = dbEvent.likes.filter(
+      (like: any) => like.profile && myFriendIds.has(like.profile.id)
     );
 
     // Return friend profiles
@@ -352,38 +352,44 @@ function HomeContent({
 
           <Animated.View
             className="absolute left-0 right-0 px-8 z-[2]"
-<<<<<<< HEAD
             style={[
               nameAnimatedStyle,
               { bottom: 140, height: 135, justifyContent: "flex-end" },
             ]}
-=======
-            style={[nameAnimatedStyle, { bottom: 140, height: 135, justifyContent: "flex-end" }]}
             pointerEvents="none"
->>>>>>> a96d7ad (Make magic happen swipe)
           >
             {/* Friend Bubbles - Instagram Reels style */}
             {friendsWhoLiked.length > 0 && (
-              <View className="flex-row items-center mb-3" style={{ marginLeft: 2 }}>
+              <View
+                className="flex-row items-center mb-3"
+                style={{ marginLeft: 2 }}
+              >
                 {/* Show up to 3 friend bubbles */}
-                {friendsWhoLiked.slice(0, 3).map((friend: any, index: number) => (
-                  <View
-                    key={friend.id}
-                    className="rounded-full border-2 border-white bg-white/20"
-                    style={{
-                      width: 32,
-                      height: 32,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: -8,
-                      zIndex: 3 - index,
-                    }}
-                  >
-                    <Text className="text-white" style={{ fontSize: 14, fontWeight: "700" }}>
-                      {friend.nickname ? friend.nickname.charAt(0).toUpperCase() : "?"}
-                    </Text>
-                  </View>
-                ))}
+                {friendsWhoLiked
+                  .slice(0, 3)
+                  .map((friend: any, index: number) => (
+                    <View
+                      key={friend.id}
+                      className="rounded-full border-2 border-white bg-white/20"
+                      style={{
+                        width: 32,
+                        height: 32,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginRight: -8,
+                        zIndex: 3 - index,
+                      }}
+                    >
+                      <Text
+                        className="text-white"
+                        style={{ fontSize: 14, fontWeight: "700" }}
+                      >
+                        {friend.nickname
+                          ? friend.nickname.charAt(0).toUpperCase()
+                          : "?"}
+                      </Text>
+                    </View>
+                  ))}
 
                 {/* Plus sign if more than 3 friends liked */}
                 {friendsWhoLiked.length > 3 && (
@@ -449,7 +455,10 @@ function HomeContent({
                   {currentCard.date}
                 </Text>
               </View>
-              <View className="flex-row items-center" style={{ gap: 6, opacity: 0.7 }}>
+              <View
+                className="flex-row items-center"
+                style={{ gap: 6, opacity: 0.7 }}
+              >
                 <Text
                   className="text-white"
                   style={{
@@ -630,13 +639,13 @@ function LineupItem({ artist }: { artist: string }) {
       <View
         className="rounded-2xl p-4 border border-white/10 overflow-hidden"
         style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.05)',
+          backgroundColor: "rgba(255, 255, 255, 0.05)",
         }}
       >
         <Animated.View
           style={[
             {
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
@@ -647,15 +656,15 @@ function LineupItem({ artist }: { artist: string }) {
         >
           <LinearGradient
             colors={[
-              'rgba(255, 255, 255, 0.15)',
-              'rgba(255, 255, 255, 0.08)',
-              'rgba(255, 255, 255, 0.02)',
+              "rgba(255, 255, 255, 0.15)",
+              "rgba(255, 255, 255, 0.08)",
+              "rgba(255, 255, 255, 0.02)",
             ]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
-              width: '100%',
-              height: '100%',
+              width: "100%",
+              height: "100%",
             }}
           />
         </Animated.View>
@@ -698,10 +707,11 @@ function SwipeCard({
   useEffect(() => {
     const detectGenre = async () => {
       try {
-        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3001';
+        const API_URL =
+          process.env.EXPO_PUBLIC_API_URL || "http://172.20.10.3:3001";
         const response = await fetch(`${API_URL}/api/detect-genre`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             eventName: card.name,
             lineup: card.lineup,
@@ -710,10 +720,10 @@ function SwipeCard({
           }),
         });
         const data = await response.json();
-        setGenre(data.genre || '');
+        setGenre(data.genre || "");
       } catch (error) {
-        console.error('Error detecting genre:', error);
-        setGenre('Music'); // Fallback
+        console.error("Error detecting genre:", error);
+        setGenre("Music"); // Fallback
       }
     };
 
@@ -933,22 +943,22 @@ Enjoy the event! 🎵`;
             {genre && (
               <View
                 style={{
-                  position: 'absolute',
+                  position: "absolute",
                   top: 50,
                   left: 30,
-                  backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                  backgroundColor: "rgba(16, 185, 129, 0.9)",
                   paddingHorizontal: 16,
                   paddingVertical: 8,
                   borderRadius: 20,
                   borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                  borderColor: "rgba(255, 255, 255, 0.3)",
                 }}
               >
                 <Text
                   style={{
-                    color: '#ffffff',
+                    color: "#ffffff",
                     fontSize: 14,
-                    fontWeight: '800',
+                    fontWeight: "800",
                     letterSpacing: 0.5,
                   }}
                 >
