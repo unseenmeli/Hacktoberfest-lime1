@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Linking,
+  ActivityIndicator,
+  Modal,
 } from "react-native";
 import Friends from "./friends";
 import Settings from "./settings";
@@ -470,6 +472,9 @@ function SwipeCard({
   const translateY = useSharedValue(0);
   const opacity = useSharedValue(0);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [showAiAnalysis, setShowAiAnalysis] = useState(false);
+  const [aiAnalysisContent, setAiAnalysisContent] = useState("");
+  const [isLoadingAi, setIsLoadingAi] = useState(false);
 
   // Fade in animation when card appears
   useEffect(() => {
@@ -545,6 +550,82 @@ function SwipeCard({
 
   const closeDetailPanel = () => {
     setShowDetails(false);
+  };
+
+  const handleAiAnalysis = async () => {
+    setIsLoadingAi(true);
+    setShowAiAnalysis(true);
+
+    try {
+      // Call backend API for AI analysis
+      // Use your computer's local IP for physical devices/emulators
+      // Change this to your deployed URL in production
+      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3001';
+
+      console.log('🔍 Attempting to connect to:', API_URL);
+      console.log('📤 Sending event data:', {
+        eventName: card.name,
+        venue: card.venue,
+        location: card.location,
+      });
+
+      const response = await fetch(`${API_URL}/api/analyze-event`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventName: card.name,
+          date: card.fullDateTime,
+          location: card.location,
+          venue: card.venue,
+          lineup: card.lineup,
+          description: card.description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch AI analysis');
+      }
+
+      const data = await response.json();
+      setAiAnalysisContent(data.analysis);
+    } catch (error) {
+      console.error('Error generating AI analysis:', error);
+
+      // Fallback to placeholder if API fails
+      const fallbackAnalysis = `📍 LOCATION DETAILS
+${card.venue}
+${card.location}
+
+🎯 EVENT OVERVIEW
+${card.name} is a ${card.lineup.length > 1 ? 'multi-artist event' : 'showcase'} featuring ${card.lineup.slice(0, 2).join(' and ')}${card.lineup.length > 2 ? ' and more' : ''}. This event promises an unforgettable experience for electronic music enthusiasts.
+
+💡 TIPS FOR ATTENDEES
+• Arrive early to avoid long queues and secure a good spot
+• Check the venue's dress code and entry requirements beforehand
+• Stay hydrated throughout the event
+• Keep your belongings secure in the crowd
+• Plan your transport home in advance, especially if the event runs late
+• Bring cash for coat check and drinks (some venues don't accept cards)
+
+🚗 HOW TO GET THERE
+The venue is located at ${card.venue} in ${card.location}.
+
+Public Transport: Check local bus and metro routes that stop near the venue.
+Taxi/Ride-share: Simply input "${card.venue}, ${card.location}" as your destination.
+Parking: Look for nearby parking facilities if driving, but note they may fill up quickly.
+
+⏰ TIMING
+Event Time: ${card.fullDateTime}
+Recommended Arrival: 30-45 minutes before start time
+
+Enjoy the event! 🎵`;
+
+      setAiAnalysisContent(fallbackAnalysis);
+    } finally {
+      setIsLoadingAi(false);
+    }
   };
 
   return (
@@ -731,6 +812,7 @@ function SwipeCard({
               <TouchableOpacity
                 className="bg-green-500/10 rounded-full py-5 items-center mt-4 border border-green-500/30"
                 activeOpacity={0.8}
+                onPress={handleAiAnalysis}
               >
                 <Text
                   className="text-green-500 uppercase"
@@ -766,6 +848,65 @@ function SwipeCard({
           </View>
         </View>
       )}
+
+      {/* AI Analysis Modal */}
+      <Modal
+        visible={showAiAnalysis}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowAiAnalysis(false)}
+      >
+        <View className="flex-1 bg-black/95">
+          <View className="flex-1 pt-16 px-8">
+            <View className="flex-row justify-between items-center mb-8">
+              <Text
+                className="text-white uppercase"
+                style={{
+                  fontSize: 32,
+                  fontWeight: "900",
+                  letterSpacing: -1,
+                }}
+              >
+                AI Analysis
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowAiAnalysis(false)}
+                className="w-12 h-12 rounded-full bg-white/10 items-center justify-center border border-white/20"
+                activeOpacity={0.7}
+              >
+                <Text className="text-white text-2xl font-bold">✕</Text>
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              className="flex-1"
+              contentContainerStyle={{ paddingBottom: 40 }}
+            >
+              {isLoadingAi ? (
+                <View className="flex-1 items-center justify-center py-20">
+                  <ActivityIndicator size="large" color="#10b981" />
+                  <Text
+                    className="text-white/60 mt-4"
+                    style={{ fontSize: 16, fontWeight: "500" }}
+                  >
+                    Analyzing event...
+                  </Text>
+                </View>
+              ) : (
+                <View className="bg-white/5 rounded-2xl p-6 border border-white/10">
+                  <Text
+                    className="text-white leading-7"
+                    style={{ fontSize: 16, lineHeight: 28 }}
+                  >
+                    {aiAnalysisContent}
+                  </Text>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </>
   );
 }

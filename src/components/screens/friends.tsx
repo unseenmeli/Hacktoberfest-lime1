@@ -547,24 +547,26 @@ export default function Friends({
                   </Text>
                 )}
 
-                {/* Unfriend Button */}
-                <TouchableOpacity
-                  disabled={busy}
-                  onPress={() => handleUnfriend(item.id)}
-                  className="bg-red-500/10 rounded-full py-2 items-center border border-red-500/30"
-                  activeOpacity={0.8}
-                >
-                  <Text
-                    className="text-red-400 uppercase"
-                    style={{
-                      fontSize: 12,
-                      fontWeight: "800",
-                      letterSpacing: 0.5,
-                    }}
+                {/* Unfriend Button - only show if friendship is mutual */}
+                {myFriendsOf.some((p: any) => p.id === item.id) && (
+                  <TouchableOpacity
+                    disabled={busy}
+                    onPress={() => handleUnfriend(item.id)}
+                    className="bg-red-500/10 rounded-full py-2 items-center border border-red-500/30"
+                    activeOpacity={0.8}
                   >
-                    Unfriend
-                  </Text>
-                </TouchableOpacity>
+                    <Text
+                      className="text-red-400 uppercase"
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "800",
+                        letterSpacing: 0.5,
+                      }}
+                    >
+                      Unfriend
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
           )}
