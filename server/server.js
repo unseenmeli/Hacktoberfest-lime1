@@ -52,7 +52,7 @@ YOUR TASK - Follow these instructions EXACTLY:
 
 1. 📍 LOCATION DETAILS
    - Start with: "${venue}, ${location}"
-   - Add this exact Google Maps link on the next line: ${googleMapsLink}
+   - Add this exact Google Maps link on the next line and make sure it's clickable: ${googleMapsLink}
    - If you know the specific street address for ${venue} in ${location}, include it
    - Keep it brief - 2-3 lines max
 
@@ -102,7 +102,12 @@ CRITICAL:
 
     const analysis = message.content[0].text;
 
-    res.json({ analysis });
+    res.json({
+      analysis,
+      venue,
+      location,
+      mapsUrl: googleMapsLink
+    });
   } catch (error) {
     console.error('Error generating AI analysis:', error);
     res.status(500).json({

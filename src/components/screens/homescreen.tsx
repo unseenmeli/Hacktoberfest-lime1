@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
+import { WebView } from 'react-native-webview';
 import Friends from "./friends";
 import Settings from "./settings";
 import db from "../../app/db";
@@ -475,6 +476,7 @@ function SwipeCard({
   const [showAiAnalysis, setShowAiAnalysis] = useState(false);
   const [aiAnalysisContent, setAiAnalysisContent] = useState("");
   const [isLoadingAi, setIsLoadingAi] = useState(false);
+  const [mapsEmbedUrl, setMapsEmbedUrl] = useState("");
 
   // Fade in animation when card appears
   useEffect(() => {
@@ -590,6 +592,13 @@ function SwipeCard({
 
       const data = await response.json();
       setAiAnalysisContent(data.analysis);
+
+      // Create Google Maps embed URL
+      if (data.venue && data.location) {
+        const query = encodeURIComponent(`${data.venue}, ${data.location}`);
+        const embedUrl = `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${query}&zoom=15`;
+        setMapsEmbedUrl(embedUrl);
+      }
     } catch (error) {
       console.error('Error generating AI analysis:', error);
 
@@ -894,14 +903,28 @@ Enjoy the event! 🎵`;
                   </Text>
                 </View>
               ) : (
-                <View className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                  <Text
-                    className="text-white leading-7"
-                    style={{ fontSize: 16, lineHeight: 28 }}
-                  >
-                    {aiAnalysisContent}
-                  </Text>
-                </View>
+                <>
+                  <View className="bg-white/5 rounded-2xl p-6 border border-white/10 mb-6">
+                    <Text
+                      className="text-white leading-7"
+                      style={{ fontSize: 16, lineHeight: 28 }}
+                    >
+                      {aiAnalysisContent}
+                    </Text>
+                  </View>
+
+                  {/* Google Maps Widget */}
+                  {mapsEmbedUrl && (
+                    <View className="rounded-2xl overflow-hidden border border-white/20" style={{ height: 300 }}>
+                      <WebView
+                        source={{ uri: mapsEmbedUrl }}
+                        style={{ flex: 1 }}
+                        scrollEnabled={false}
+                        bounces={false}
+                      />
+                    </View>
+                  )}
+                </>
               )}
             </ScrollView>
           </View>
