@@ -516,6 +516,8 @@ function SwipeCard({
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [mapsEmbedUrl, setMapsEmbedUrl] = useState("");
   const [genre, setGenre] = useState<string>("");
+  const genreOpacity = useSharedValue(0);
+  const genreTranslateY = useSharedValue(-20);
 
   // Fade in animation when card appears
   useEffect(() => {
@@ -524,6 +526,11 @@ function SwipeCard({
 
   // Detect genre when card loads
   useEffect(() => {
+    // Reset animation values for new card
+    genreOpacity.value = 0;
+    genreTranslateY.value = -20;
+    setGenre("");
+
     const detectGenre = async () => {
       try {
         const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3001';
@@ -538,10 +545,17 @@ function SwipeCard({
           }),
         });
         const data = await response.json();
-        setGenre(data.genre || '');
+        if (data.genre) {
+          setGenre(data.genre);
+          // Animate in with spring
+          genreOpacity.value = withSpring(1, { damping: 15, stiffness: 100 });
+          genreTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
+        }
       } catch (error) {
         console.error('Error detecting genre:', error);
         setGenre('Music'); // Fallback
+        genreOpacity.value = withSpring(1, { damping: 15, stiffness: 100 });
+        genreTranslateY.value = withSpring(0, { damping: 15, stiffness: 100 });
       }
     };
 
@@ -618,6 +632,11 @@ function SwipeCard({
   const closeDetailPanel = () => {
     setShowDetails(false);
   };
+
+  const genreAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: genreOpacity.value,
+    transform: [{ translateY: genreTranslateY.value }],
+  }));
 
   const handleAiAnalysis = async () => {
     setIsLoadingAi(true);
@@ -759,18 +778,15 @@ Enjoy the event! 🎵`;
 
             {/* Genre Tag */}
             {genre && (
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 50,
-                  left: 30,
-                  backgroundColor: 'rgba(16, 185, 129, 0.9)',
-                  paddingHorizontal: 16,
-                  paddingVertical: 8,
-                  borderRadius: 20,
-                  borderWidth: 1,
-                  borderColor: 'rgba(255, 255, 255, 0.3)',
-                }}
+              <Animated.View
+                style={[
+                  genreAnimatedStyle,
+                  {
+                    position: 'absolute',
+                    top: 50,
+                    left: 30,
+                  },
+                ]}
               >
                 <Text
                   style={{
@@ -778,11 +794,14 @@ Enjoy the event! 🎵`;
                     fontSize: 14,
                     fontWeight: '800',
                     letterSpacing: 0.5,
+                    textShadowColor: 'rgba(0, 0, 0, 0.9)',
+                    textShadowOffset: { width: 0, height: 0 },
+                    textShadowRadius: 3,
                   }}
                 >
                   #{genre.toUpperCase()}
                 </Text>
-              </View>
+              </Animated.View>
             )}
           </View>
 
