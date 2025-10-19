@@ -107,29 +107,17 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
       setBusy(true);
 
       if (targetProfile) {
-        // ✅ Link me → the correct profile (owned if available, otherwise stub)
+        // ✅ Link me → the correct profile (owned if available)
         await db.transact(
           db.tx.profiles[myProfileId!].link({ friends: targetProfile.id })
         );
+        setEmail("");
+        setIsSearchFocused(false);
+        Alert.alert("Success", "Friend request sent!");
       } else {
-        // ✅ No match at all → create a stub WITHOUT $user and link me → stub
-        const stubId = id();
-        await db.transact([
-          db.tx.profiles[stubId].update({
-            nickname:
-              emailLower.split("@")[0] +
-              "-" +
-              Math.floor(Math.random() * 10000),
-            emailLower,
-            createdAt: new Date().toISOString(),
-          }),
-          db.tx.profiles[myProfileId!].link({ friends: stubId }),
-        ]);
+        // ❌ No match at all → show error, don't create stub
+        Alert.alert("User not found", "No user exists with this email address.");
       }
-
-      setEmail("");
-      setIsSearchFocused(false);
-      Alert.alert("Success", "Friend added (they'll see a request).");
     } catch (e: any) {
       Alert.alert("Error", e?.message || "Could not add friend");
     } finally {
@@ -301,18 +289,18 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                             <Text className="font-semibold">{targetProfile.nickname}</Text>
                           </Text>
                         ) : emailLower.length > 0 ? (
-                          <Text className="text-white/60" style={{ fontSize: 14 }}>
-                            Will create new profile
+                          <Text className="text-red-400" style={{ fontSize: 14 }}>
+                            User not found
                           </Text>
                         ) : null}
                       </View>
                     )}
 
                     <TouchableOpacity
-                      disabled={!canSubmit || busy || alreadyFriend || isSelf}
+                      disabled={!canSubmit || busy || alreadyFriend || isSelf || !targetProfile}
                       onPress={handleAddByEmail}
                       className={`rounded-full py-5 items-center ${
-                        !canSubmit || busy || alreadyFriend || isSelf
+                        !canSubmit || busy || alreadyFriend || isSelf || !targetProfile
                           ? "bg-white/20"
                           : "bg-white"
                       }`}
@@ -325,7 +313,7 @@ export default function Friends({ activeTab = "friends", setActiveTab }: Friends
                           fontWeight: "800",
                           letterSpacing: 1,
                           color:
-                            !canSubmit || busy || alreadyFriend || isSelf
+                            !canSubmit || busy || alreadyFriend || isSelf || !targetProfile
                               ? "rgba(255,255,255,0.6)"
                               : "#000000",
                         }}
