@@ -112,29 +112,17 @@ export default function Friends({
       setBusy(true);
 
       if (targetProfile) {
-        // ✅ Link me → the correct profile (owned if available, otherwise stub)
+        // ✅ Link me → the correct profile (owned if available)
         await db.transact(
           db.tx.profiles[myProfileId!].link({ friends: targetProfile.id })
         );
+        setEmail("");
+        setIsSearchFocused(false);
+        Alert.alert("Success", "Friend request sent!");
       } else {
-        // ✅ No match at all → create a stub WITHOUT $user and link me → stub
-        const stubId = id();
-        await db.transact([
-          db.tx.profiles[stubId].update({
-            nickname:
-              emailLower.split("@")[0] +
-              "-" +
-              Math.floor(Math.random() * 10000),
-            emailLower,
-            createdAt: new Date().toISOString(),
-          }),
-          db.tx.profiles[myProfileId!].link({ friends: stubId }),
-        ]);
+        // ❌ No match at all → show error, don't create stub
+        Alert.alert("User not found", "No user exists with this email address.");
       }
-
-      setEmail("");
-      setIsSearchFocused(false);
-      Alert.alert("Success", "Friend added (they'll see a request).");
     } catch (e: any) {
       Alert.alert("Error", e?.message || "Could not add friend");
     } finally {
@@ -296,6 +284,93 @@ export default function Friends({
                     >
                       friend@example.com
                     </Text>
+                  </TouchableOpacity>
+                ) : (
+                  <View className="bg-black/90 rounded-2xl p-6 border border-white/20">
+                    <View className="flex-row items-center justify-between mb-4">
+                      <Text
+                        className="text-white uppercase"
+                        style={{
+                          fontSize: 24,
+                          fontWeight: "900",
+                          letterSpacing: -1,
+                        }}
+                      >
+                        Add Friend
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setIsSearchFocused(false);
+                          setEmail("");
+                        }}
+                        className="w-10 h-10 rounded-full bg-white/10 items-center justify-center"
+                        activeOpacity={0.7}
+                      >
+                        <Text className="text-white text-xl">✕</Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <TextInput
+                      className="border border-white/20 rounded-2xl px-6 py-5 text-white bg-white/5 mb-4"
+                      placeholder="friend@example.com"
+                      placeholderTextColor="#6b7280"
+                      autoCapitalize="none"
+                      keyboardType="email-address"
+                      value={email}
+                      onChangeText={setEmail}
+                      editable={!busy}
+                      autoFocus={true}
+                      style={{ fontSize: 16, fontWeight: "500" }}
+                    />
+
+                    {(alreadyFriend || isSelf || targetProfile || emailLower.length > 0) && (
+                      <View className="mb-4">
+                        {alreadyFriend ? (
+                          <Text className="text-white/70" style={{ fontSize: 14 }}>
+                            ✓ Already your friend
+                          </Text>
+                        ) : isSelf ? (
+                          <Text className="text-white/70" style={{ fontSize: 14 }}>
+                            That's you
+                          </Text>
+                        ) : targetProfile ? (
+                          <Text className="text-white/80" style={{ fontSize: 14 }}>
+                            Found:{" "}
+                            <Text className="font-semibold">{targetProfile.nickname}</Text>
+                          </Text>
+                        ) : emailLower.length > 0 ? (
+                          <Text className="text-red-400" style={{ fontSize: 14 }}>
+                            User not found
+                          </Text>
+                        ) : null}
+                      </View>
+                    )}
+
+                    <TouchableOpacity
+                      disabled={!canSubmit || busy || alreadyFriend || isSelf || !targetProfile}
+                      onPress={handleAddByEmail}
+                      className={`rounded-full py-5 items-center ${
+                        !canSubmit || busy || alreadyFriend || isSelf || !targetProfile
+                          ? "bg-white/20"
+                          : "bg-white"
+                      }`}
+                      activeOpacity={0.8}
+                    >
+                      <Text
+                        className="uppercase"
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "800",
+                          letterSpacing: 1,
+                          color:
+                            !canSubmit || busy || alreadyFriend || isSelf || !targetProfile
+                              ? "rgba(255,255,255,0.6)"
+                              : "#000000",
+                        }}
+                      >
+                        {busy ? "Adding..." : "Add Friend"}
+                      </Text>
+                    </TouchableOpacity>
                   </View>
                 </TouchableOpacity>
               </View>

@@ -7,12 +7,15 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
+  Linking,
 } from "react-native";
 import Friends from "./friends";
 import Settings from "./settings";
 import db from "../../app/db";
 import { useState, useEffect } from "react";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import useEnsureProfile from "../../lib/useEnsureProfile";
+import { id } from "@instantdb/react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -25,60 +28,78 @@ import Animated, {
 const { height, width } = Dimensions.get("window");
 const SWIPE_THRESHOLD = width * 0.3;
 
-const CARDS_DATA = [
-  {
-    id: 1,
-    name: "BASIANI",
-    date: "17.10.25 • 23:59",
-    location: "Tbilisi, Georgia",
-    description:
-      "Experience the legendary underground techno club that has become a symbol of freedom and expression. Join us for a night of immersive electronic music with world-renowned DJs.",
-    lineup: ["Amelie Lens", "Ben Klock", "Marcel Dettmann"],
-  },
-  {
-    id: 2,
-    name: "BASSIANI OPEN AIR",
-    date: "24.10.25 • 22:00",
-    location: "Tbilisi, Georgia",
-    description:
-      "Take the Bassiani experience outdoors for a special open-air event featuring international headliners and local heroes.",
-    lineup: ["Tale of Us", "Âme", "Recondite"],
-  },
-  {
-    id: 3,
-    name: "BASSIANI AFTERHOURS",
-    date: "01.11.25 • 06:00",
-    location: "Tbilisi, Georgia",
-    description:
-      "When the night ends, the party continues. Join us for an intimate afterhours session with special guests.",
-    lineup: ["DVS1", "Dax J", "Kobosil"],
-  },
-  {
-    id: 4,
-    name: "BASSIANI ANNIVERSARY",
-    date: "15.11.25 • 23:00",
-    location: "Tbilisi, Georgia",
-    description:
-      "Celebrating another year of pushing boundaries and creating unforgettable moments on the dance floor.",
-    lineup: ["Nina Kraviz", "I Hate Models", "Clouds"],
-  },
-  {
-    id: 5,
-    name: "BASSIANI NEW YEAR",
-    date: "31.12.25 • 23:00",
-    location: "Tbilisi, Georgia",
-    description:
-      "Ring in the new year with the most legendary techno marathon of the season. 24 hours of non-stop music.",
-    lineup: ["Adam Beyer", "Charlotte de Witte", "Amelie Lens"],
-  },
-];
+// Helper function to transform event data
+function transformEvent(event: any, index: number) {
+  // Format date from YYYY-MM-DD to DD.MM.YY
+  let formattedDate = 'TBA';
+  let fullDateTime = 'TBA';
+
+  if (event.date) {
+    const dateObj = new Date(event.date);
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const year = String(dateObj.getFullYear()).slice(-2);
+    formattedDate = `${day}.${month}.${year}`;
+
+    // Create a more detailed date/time string for the detail view
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthName = monthNames[dateObj.getMonth()];
+    fullDateTime = `${monthName} ${day}, 20${year}`;
+
+    if (event.startTime) {
+      fullDateTime += ` • ${event.startTime}`;
+      formattedDate += ` • ${event.startTime}`;
+    }
+
+    if (event.endTime) {
+      fullDateTime += ` - ${event.endTime}`;
+    }
+  }
+
+  return {
+    id: event.eventId || event.id || `event-${index}`,
+    name: event.title,
+    date: formattedDate,
+    fullDateTime: fullDateTime,
+    location: `${event.city}, ${event.country === 'GE' ? 'Georgia' : event.country}`,
+    description: event.description || `Join us at ${event.venue} for an unforgettable night of music and entertainment.`,
+    lineup: event.artists || [],
+    venue: event.venue,
+    image: event.image,
+    ticketUrl: event.raUrl || event.ticketUrl || '',
+  };
+}
 
 export default function Home() {
+  useEnsureProfile();
+
   const [activeTab, setActiveTab] = useState("home");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const nameOpacity = useSharedValue(0);
   const cardTranslateX = useSharedValue(0);
+
+  const { user } = db.useAuth();
+
+  // Get current user's profile
+  const myQuery = user
+    ? {
+        profiles: {
+          $: { where: { "$user.id": user.id }, limit: 1 },
+        },
+      }
+    : null;
+
+  const { data: profileData } = db.useQuery(myQuery);
+  const myProfile = profileData?.profiles?.[0];
+
+  // Fetch events from InstantDB
+  const { isLoading, error, data } = db.useQuery({ events: {} });
+
+  // Transform the events data to match the card structure
+  const CARDS_DATA = data?.events
+    ? data.events.map((event: any, index: number) => transformEvent(event, index))
+    : [];
 
   const handleSwipeLeft = () => {
     console.log("Nope!");
@@ -86,8 +107,43 @@ export default function Home() {
     setShowDetails(false);
   };
 
-  const handleSwipeRight = () => {
-    console.log("Like!");
+  const handleSwipeRight = async () => {
+    const currentCard = CARDS_DATA[currentIndex];
+
+    // Save the like to the database
+    if (myProfile && currentCard) {
+      try {
+        // Find the event in the database by eventId
+        const eventToLike = data?.events.find((e: any) => e.eventId === currentCard.id);
+
+        if (eventToLike) {
+          // Create a new like with timestamp
+          const likeId = id();
+          await db.transact([
+            db.tx.likes[likeId].update({
+              createdAt: new Date(),
+            }),
+            // Link the like to the user's profile
+            db.tx.likes[likeId].link({
+              profile: myProfile.id,
+            }),
+            // Link the like to the event
+            db.tx.likes[likeId].link({
+              event: eventToLike.id,
+            }),
+          ]);
+
+          console.log(`Like saved! User: ${user?.email}, Event: ${currentCard.name} (${currentCard.id})`);
+        } else {
+          console.error("Event not found in database");
+        }
+      } catch (error) {
+        console.error("Error saving like:", error);
+      }
+    } else {
+      console.log("Cannot save like - profile or card missing");
+    }
+
     setCurrentIndex((prev) => prev + 1);
     setShowDetails(false);
   };
@@ -124,6 +180,25 @@ export default function Home() {
 
   if (activeTab === "settings") {
     return <Settings activeTab={activeTab} setActiveTab={setActiveTab} />;
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white text-xl">Loading events...</Text>
+      </View>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <View className="flex-1 items-center justify-center bg-black">
+        <Text className="text-white text-xl font-bold">Error loading events</Text>
+        <Text className="text-white/60 mt-2">{error.message}</Text>
+      </View>
+    );
   }
 
   return (
@@ -427,7 +502,7 @@ function SwipeCard({
             style={{ width: width, height: height * 0.7, position: "relative" }}
           >
             <Image
-              source={require("../../../assets/images/basiani.png")}
+              source={{ uri: card.image }}
               style={{ width: width, height: height * 0.7 }}
               resizeMode="cover"
             />
@@ -524,7 +599,7 @@ function SwipeCard({
                   className="text-white"
                   style={{ fontSize: 24, fontWeight: "700" }}
                 >
-                  {card.date}
+                  {card.fullDateTime}
                 </Text>
               </View>
 
@@ -612,6 +687,17 @@ function SwipeCard({
               <TouchableOpacity
                 className="bg-white rounded-full py-5 items-center mt-4"
                 activeOpacity={0.8}
+                onPress={() => {
+                  if (card.ticketUrl) {
+                    Linking.openURL(card.ticketUrl).catch(err =>
+                      console.error('Failed to open URL:', err)
+                    );
+                  }
+                }}
+                disabled={!card.ticketUrl}
+                style={{
+                  opacity: card.ticketUrl ? 1 : 0.5,
+                }}
               >
                 <Text
                   className="text-black uppercase"
