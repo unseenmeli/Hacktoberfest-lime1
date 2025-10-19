@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Modal,
 } from "react-native";
-import { WebView } from 'react-native-webview';
+import { WebView } from "react-native-webview";
 import Friends from "./friends";
 import Settings from "./settings";
 import db from "../../app/db";
@@ -34,18 +34,31 @@ const SWIPE_THRESHOLD = width * 0.3;
 // Helper function to transform event data
 function transformEvent(event: any, index: number) {
   // Format date from YYYY-MM-DD to DD.MM.YY
-  let formattedDate = 'TBA';
-  let fullDateTime = 'TBA';
+  let formattedDate = "TBA";
+  let fullDateTime = "TBA";
 
   if (event.date) {
     const dateObj = new Date(event.date);
-    const day = String(dateObj.getDate()).padStart(2, '0');
-    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, "0");
+    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
     const year = String(dateObj.getFullYear()).slice(-2);
     formattedDate = `${day}.${month}.${year}`;
 
     // Create a more detailed date/time string for the detail view
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
     const monthName = monthNames[dateObj.getMonth()];
     fullDateTime = `${monthName} ${day}, 20${year}`;
 
@@ -64,12 +77,16 @@ function transformEvent(event: any, index: number) {
     name: event.title,
     date: formattedDate,
     fullDateTime: fullDateTime,
-    location: `${event.city}, ${event.country === 'GE' ? 'Georgia' : event.country}`,
-    description: event.description || `Join us at ${event.venue} for an unforgettable night of music and entertainment.`,
+    location: `${event.city}, ${
+      event.country === "GE" ? "Georgia" : event.country
+    }`,
+    description:
+      event.description ||
+      `Join us at ${event.venue} for an unforgettable night of music and entertainment.`,
     lineup: event.artists || [],
     venue: event.venue,
     image: event.image,
-    ticketUrl: event.raUrl || event.ticketUrl || '',
+    ticketUrl: event.raUrl || event.ticketUrl || "",
   };
 }
 
@@ -107,7 +124,10 @@ function HomeContent({
   // Get current user's profile
   const myQuery = {
     profiles: {
-      $: { where: user ? { "$user.id": user.id } : { id: "never-match" }, limit: 1 },
+      $: {
+        where: user ? { "$user.id": user.id } : { id: "never-match" },
+        limit: 1,
+      },
     },
   };
 
@@ -119,22 +139,24 @@ function HomeContent({
 
   // Debug logging
   useEffect(() => {
-    console.log('Events query state:', {
+    console.log("Events query state:", {
       isLoading,
       hasError: !!error,
       error: error?.message || error,
       hasData: !!data,
       eventCount: data?.events?.length,
-      dataKeys: data ? Object.keys(data) : []
+      dataKeys: data ? Object.keys(data) : [],
     });
     if (data && !data.events) {
-      console.log('Data exists but no events property:', data);
+      console.log("Data exists but no events property:", data);
     }
   }, [isLoading, error, data]);
 
   // Transform the events data to match the card structure
   const CARDS_DATA = data?.events
-    ? data.events.map((event: any, index: number) => transformEvent(event, index))
+    ? data.events.map((event: any, index: number) =>
+        transformEvent(event, index)
+      )
     : [];
 
   const handleSwipeLeft = () => {
@@ -150,7 +172,9 @@ function HomeContent({
     if (myProfile && currentCard) {
       try {
         // Find the event in the database by eventId
-        const eventToLike = data?.events.find((e: any) => e.eventId === currentCard.id);
+        const eventToLike = data?.events.find(
+          (e: any) => e.eventId === currentCard.id
+        );
 
         if (eventToLike) {
           // Create a new like with timestamp
@@ -169,7 +193,9 @@ function HomeContent({
             }),
           ]);
 
-          console.log(`Like saved! User: ${user?.email}, Event: ${currentCard.name} (${currentCard.id})`);
+          console.log(
+            `Like saved! User: ${user?.email}, Event: ${currentCard.name} (${currentCard.id})`
+          );
         } else {
           console.error("Event not found in database");
         }
@@ -234,9 +260,12 @@ function HomeContent({
   if (isLoading && !data && showLoadingTimeout) {
     return (
       <View className="flex-1 items-center justify-center bg-black px-8">
-        <Text className="text-white text-xl font-bold mb-4">Taking longer than expected...</Text>
+        <Text className="text-white text-xl font-bold mb-4">
+          Taking longer than expected...
+        </Text>
         <Text className="text-white/60 text-center mb-6">
-          This might be a network issue or the events may not be loaded in the database yet.
+          This might be a network issue or the events may not be loaded in the
+          database yet.
         </Text>
         <Text className="text-white/40 text-sm text-center">
           Check your console logs for details.
@@ -249,7 +278,9 @@ function HomeContent({
   if (error) {
     return (
       <View className="flex-1 items-center justify-center bg-black">
-        <Text className="text-white text-xl font-bold">Error loading events</Text>
+        <Text className="text-white text-xl font-bold">
+          Error loading events
+        </Text>
         <Text className="text-white/60 mt-2">{error.message}</Text>
       </View>
     );
@@ -292,7 +323,10 @@ function HomeContent({
 
           <Animated.View
             className="absolute left-0 right-0 px-8 z-[2]"
-            style={[nameAnimatedStyle, { bottom: 140, height: 135, justifyContent: "flex-end" }]}
+            style={[
+              nameAnimatedStyle,
+              { bottom: 140, height: 135, justifyContent: "flex-end" },
+            ]}
           >
             <Text
               className="text-white uppercase"
@@ -365,7 +399,11 @@ function HomeContent({
             </View>
             <Text
               className="text-xs text-white uppercase"
-              style={{ marginTop: 2, opacity: activeTab === "home" ? 1 : 0.5, fontWeight: "700" }}
+              style={{
+                marginTop: 2,
+                opacity: activeTab === "home" ? 1 : 0.5,
+                fontWeight: "700",
+              }}
             >
               HOME
             </Text>
@@ -451,7 +489,7 @@ function HomeContent({
 }
 
 interface SwipeCardProps {
-  card: typeof CARDS_DATA[0];
+  card: (typeof CARDS_DATA)[0];
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
   onSwipeUp: () => void;
@@ -477,10 +515,37 @@ function SwipeCard({
   const [aiAnalysisContent, setAiAnalysisContent] = useState("");
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const [mapsEmbedUrl, setMapsEmbedUrl] = useState("");
+  const [genre, setGenre] = useState<string>("");
 
   // Fade in animation when card appears
   useEffect(() => {
     opacity.value = withTiming(1, { duration: 800 });
+  }, [card.id]);
+
+  // Detect genre when card loads
+  useEffect(() => {
+    const detectGenre = async () => {
+      try {
+        const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3001';
+        const response = await fetch(`${API_URL}/api/detect-genre`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            eventName: card.name,
+            lineup: card.lineup,
+            description: card.description,
+            venue: card.venue,
+          }),
+        });
+        const data = await response.json();
+        setGenre(data.genre || '');
+      } catch (error) {
+        console.error('Error detecting genre:', error);
+        setGenre('Music'); // Fallback
+      }
+    };
+
+    detectGenre();
   }, [card.id]);
 
   const panGesture = Gesture.Pan()
@@ -562,19 +627,20 @@ function SwipeCard({
       // Call backend API for AI analysis
       // Use your computer's local IP for physical devices/emulators
       // Change this to your deployed URL in production
-      const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://172.20.10.3:3001';
+      const API_URL =
+        process.env.EXPO_PUBLIC_API_URL || "http://172.20.10.3:3001";
 
-      console.log('🔍 Attempting to connect to:', API_URL);
-      console.log('📤 Sending event data:', {
+      console.log("🔍 Attempting to connect to:", API_URL);
+      console.log("📤 Sending event data:", {
         eventName: card.name,
         venue: card.venue,
         location: card.location,
       });
 
       const response = await fetch(`${API_URL}/api/analyze-event`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           eventName: card.name,
@@ -587,7 +653,7 @@ function SwipeCard({
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch AI analysis');
+        throw new Error("Failed to fetch AI analysis");
       }
 
       const data = await response.json();
@@ -618,7 +684,7 @@ function SwipeCard({
         setMapsEmbedUrl(iframeHtml);
       }
     } catch (error) {
-      console.error('Error generating AI analysis:', error);
+      console.error("Error generating AI analysis:", error);
 
       // Fallback to placeholder if API fails
       const fallbackAnalysis = `📍 LOCATION DETAILS
@@ -626,7 +692,11 @@ ${card.venue}
 ${card.location}
 
 🎯 EVENT OVERVIEW
-${card.name} is a ${card.lineup.length > 1 ? 'multi-artist event' : 'showcase'} featuring ${card.lineup.slice(0, 2).join(' and ')}${card.lineup.length > 2 ? ' and more' : ''}. This event promises an unforgettable experience for electronic music enthusiasts.
+${card.name} is a ${
+        card.lineup.length > 1 ? "multi-artist event" : "showcase"
+      } featuring ${card.lineup.slice(0, 2).join(" and ")}${
+        card.lineup.length > 2 ? " and more" : ""
+      }. This event promises an unforgettable experience for electronic music enthusiasts.
 
 💡 TIPS FOR ATTENDEES
 • Arrive early to avoid long queues and secure a good spot
@@ -640,7 +710,9 @@ ${card.name} is a ${card.lineup.length > 1 ? 'multi-artist event' : 'showcase'} 
 The venue is located at ${card.venue} in ${card.location}.
 
 Public Transport: Check local bus and metro routes that stop near the venue.
-Taxi/Ride-share: Simply input "${card.venue}, ${card.location}" as your destination.
+Taxi/Ride-share: Simply input "${card.venue}, ${
+        card.location
+      }" as your destination.
 Parking: Look for nearby parking facilities if driving, but note they may fill up quickly.
 
 ⏰ TIMING
@@ -659,7 +731,10 @@ Enjoy the event! 🎵`;
     <>
       <GestureDetector gesture={panGesture}>
         <Animated.View
-          style={[animatedStyle, { position: "absolute", width: width, height: height }]}
+          style={[
+            animatedStyle,
+            { position: "absolute", width: width, height: height },
+          ]}
           className="bg-black"
         >
           <View
@@ -681,6 +756,34 @@ Enjoy the event! 🎵`;
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
             />
+
+            {/* Genre Tag */}
+            {genre && (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 50,
+                  left: 30,
+                  backgroundColor: 'rgba(16, 185, 129, 0.9)',
+                  paddingHorizontal: 16,
+                  paddingVertical: 8,
+                  borderRadius: 20,
+                  borderWidth: 1,
+                  borderColor: 'rgba(255, 255, 255, 0.3)',
+                }}
+              >
+                <Text
+                  style={{
+                    color: '#ffffff',
+                    fontSize: 14,
+                    fontWeight: '800',
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  #{genre.toUpperCase()}
+                </Text>
+              </View>
+            )}
           </View>
 
           <Animated.View
@@ -755,7 +858,11 @@ Enjoy the event! 🎵`;
               <View className="mb-8">
                 <Text
                   className="text-white/60 uppercase mb-2"
-                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    letterSpacing: 1.5,
+                  }}
                 >
                   Date & Time
                 </Text>
@@ -770,7 +877,11 @@ Enjoy the event! 🎵`;
               <View className="mb-8">
                 <Text
                   className="text-white/60 uppercase mb-2"
-                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    letterSpacing: 1.5,
+                  }}
                 >
                   Location
                 </Text>
@@ -785,7 +896,11 @@ Enjoy the event! 🎵`;
               <View className="mb-8">
                 <Text
                   className="text-white/60 uppercase mb-2"
-                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    letterSpacing: 1.5,
+                  }}
                 >
                   Description
                 </Text>
@@ -798,13 +913,19 @@ Enjoy the event! 🎵`;
                 </Text>
                 {card.description.length > 150 && (
                   <TouchableOpacity
-                    onPress={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    onPress={() =>
+                      setIsDescriptionExpanded(!isDescriptionExpanded)
+                    }
                     className="mt-2"
                     activeOpacity={0.7}
                   >
                     <Text
                       className="text-white/60 uppercase"
-                      style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1 }}
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "600",
+                        letterSpacing: 1,
+                      }}
                     >
                       {isDescriptionExpanded ? "See Less" : "See More"}
                     </Text>
@@ -815,7 +936,11 @@ Enjoy the event! 🎵`;
               <View className="mb-8">
                 <Text
                   className="text-white/60 uppercase mb-4"
-                  style={{ fontSize: 12, fontWeight: "600", letterSpacing: 1.5 }}
+                  style={{
+                    fontSize: 12,
+                    fontWeight: "600",
+                    letterSpacing: 1.5,
+                  }}
                 >
                   Lineup
                 </Text>
@@ -845,7 +970,7 @@ Enjoy the event! 🎵`;
                   className="text-green-500 uppercase"
                   style={{ fontSize: 16, fontWeight: "800", letterSpacing: 1 }}
                 >
-                  AI Analysis
+                  Lime AI
                 </Text>
               </TouchableOpacity>
 
@@ -854,8 +979,8 @@ Enjoy the event! 🎵`;
                 activeOpacity={0.8}
                 onPress={() => {
                   if (card.ticketUrl) {
-                    Linking.openURL(card.ticketUrl).catch(err =>
-                      console.error('Failed to open URL:', err)
+                    Linking.openURL(card.ticketUrl).catch((err) =>
+                      console.error("Failed to open URL:", err)
                     );
                   }
                 }}
@@ -894,7 +1019,7 @@ Enjoy the event! 🎵`;
                   letterSpacing: -1,
                 }}
               >
-                AI Analysis
+                Lime AI
               </Text>
               <TouchableOpacity
                 onPress={() => setShowAiAnalysis(false)}
@@ -933,7 +1058,10 @@ Enjoy the event! 🎵`;
 
                   {/* Google Maps Widget */}
                   {mapsEmbedUrl && (
-                    <View className="rounded-2xl overflow-hidden border border-white/20" style={{ height: 300 }}>
+                    <View
+                      className="rounded-2xl overflow-hidden border border-white/20"
+                      style={{ height: 300 }}
+                    >
                       <WebView
                         source={{ html: mapsEmbedUrl }}
                         style={{ flex: 1 }}

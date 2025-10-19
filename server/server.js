@@ -22,6 +22,37 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'Swipe API is running' });
 });
 
+// Genre detection endpoint - quick and cheap
+app.post('/api/detect-genre', async (req, res) => {
+  try {
+    const { eventName, lineup, description, venue } = req.body;
+
+    const prompt = `Based on this event information, identify the PRIMARY music genre in 1-2 words max.
+
+Event: ${eventName}
+Lineup: ${lineup && lineup.length > 0 ? lineup.join(', ') : 'Not specified'}
+Venue: ${venue || 'Not specified'}
+Description: ${description || 'Not specified'}
+
+Common genres: Techno, House, Electronic, Hip-Hop, Rock, Indie, Jazz, Pop, R&B, Metal, Punk, EDM, Drum & Bass, Dubstep, Trance, Alternative
+
+Respond with ONLY the genre name, nothing else. Be specific but concise.`;
+
+    const message = await anthropic.messages.create({
+      model: 'claude-3-5-haiku-20241022', // Using Haiku for speed and cost
+      max_tokens: 20,
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const genre = message.content[0].text.trim();
+
+    res.json({ genre });
+  } catch (error) {
+    console.error('Error detecting genre:', error);
+    res.json({ genre: 'Music' }); // Fallback genre
+  }
+});
+
 // AI Analysis endpoint for events
 app.post('/api/analyze-event', async (req, res) => {
   console.log('📥 Received request from:', req.ip);
@@ -42,18 +73,19 @@ app.post('/api/analyze-event', async (req, res) => {
 
 Event Details:
 - Name: ${eventName}
-- Date: ${date}
-- Location: ${location}
-- Venue: ${venue}
-- Lineup: ${lineup?.join(', ') || 'N/A'}
-- Description: ${description}
+- Date: ${date || 'Not specified'}
+- Location: ${location || 'Not specified'}
+- Venue: ${venue || 'Not specified'}
+- Lineup: ${lineup && lineup.length > 0 ? lineup.join(', ') : 'Not specified'}
+- Description: ${description || 'No description provided'}
 
 YOUR TASK - Follow these instructions EXACTLY:
 
 1. 📍 LOCATION DETAILS
-   - Start with: "${venue}, ${location}"
+   - ${venue ? `Venue: ${venue}` : 'Venue: Not specified'}
+   - ${location ? `Location: ${location}` : 'Location: Not specified'}
    - If you know the specific street address for ${venue} in ${location}, include it
-   - Note: An interactive map is shown below your analysis, so no need to include any Google Maps links
+   - Note: An interactive map widget is shown below, so do NOT include any Google Maps links or URLs
    - Keep it brief - 2-3 lines max
 
 2. 🎯 EVENT OVERVIEW
@@ -86,7 +118,9 @@ CRITICAL:
 - Use "you" and "your" to speak directly to the reader
 - Skip generic advice - be specific to THIS event and genre
 - Don't use corporate language or excessive emojis beyond the section headers
-- Keep total response under 400 words`;
+- Keep total response under 400 words
+- DO NOT include any URLs, links, or web addresses in your response
+- If lineup or venue information says "Not specified", acknowledge it naturally (e.g., "Lineup TBA" or "Details to be announced")`;
 
 
     const message = await anthropic.messages.create({
